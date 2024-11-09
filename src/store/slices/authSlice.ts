@@ -23,7 +23,9 @@ const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem('access_token'),
   accessToken: localStorage.getItem('access_token'),
   refreshToken: localStorage.getItem('refresh_token'),
-  userProfile: null,
+  userProfile: localStorage.getItem('user_profile') 
+    ? JSON.parse(localStorage.getItem('user_profile')!) 
+    : null,
   loading: false,
   error: null,
 };
@@ -48,6 +50,8 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      localStorage.setItem('access_token', action.payload.accessToken);
+      localStorage.setItem('refresh_token', action.payload.refreshToken);
     },
     logout: (state) => {
       state.isAuthenticated = false;
@@ -57,6 +61,7 @@ const authSlice = createSlice({
       state.error = null;
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_profile');
     },
   },
   extraReducers: (builder) => {
@@ -68,6 +73,7 @@ const authSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.userProfile = action.payload;
+        localStorage.setItem('user_profile', JSON.stringify(action.payload));
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;

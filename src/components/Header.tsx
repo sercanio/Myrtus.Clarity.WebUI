@@ -1,6 +1,7 @@
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Typography } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Typography } from 'antd';
 import type { MenuProps } from 'antd';
 import { 
   UserOutlined, 
@@ -8,7 +9,9 @@ import {
   LogoutOutlined,
   LoginOutlined,
   BulbOutlined,
-  BulbFilled
+  BulbFilled,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined
 } from '@ant-design/icons';
 import { KeycloakService } from '../services/keycloak';
 import { logout } from '../store/slices/authSlice';
@@ -83,39 +86,54 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
     },
   ];
 
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const modifierKey = isMac ? '⌘' : 'Ctrl';
+
   return (
     <AntHeader style={{ 
       padding: '0 24px', 
       background: isDarkMode ? '#141414' : '#fff',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'flex-end',
+      justifyContent: 'space-between',
       gap: '16px'
     }}>
-      <Switch
-        checkedChildren={<BulbOutlined />}
-        unCheckedChildren={<BulbFilled />}
-        checked={isDarkMode}
-        onChange={setDarkMode}
-      />
+      <Space>
+        {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+          onClick: () => setCollapsed(!collapsed),
+          style: { fontSize: '16px', cursor: 'pointer' }
+        })}
+        <Tag color="cyan" style={{ margin: 0 }}>
+          {modifierKey} + B
+        </Tag>
+      </Space>
 
-      {isAuthenticated ? (
-        <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
-          <Space style={{ cursor: 'pointer' }}>
-            <Avatar 
-              style={{ backgroundColor: '#1890ff' }}
-              size="large"
-              src={userProfile?.avatarUrl}
-              icon={!userProfile?.avatarUrl && <UserOutlined />}
-            />
+      <Space>
+        <Switch
+          checkedChildren={<BulbOutlined />}
+          unCheckedChildren={<BulbFilled />}
+          checked={isDarkMode}
+          onChange={setDarkMode}
+        />
+
+        {isAuthenticated ? (
+          <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
+            <Space style={{ cursor: 'pointer' }}>
+              <Avatar 
+                style={{ backgroundColor: '#1890ff' }}
+                size="large"
+                src={userProfile?.avatarUrl}
+                icon={!userProfile?.avatarUrl && <UserOutlined />}
+              />
+            </Space>
+          </Dropdown>
+        ) : (
+          <Space style={{ cursor: 'pointer' }} onClick={handleLogin}>
+            <LoginOutlined />
+            <Text>Login</Text>
           </Space>
-        </Dropdown>
-      ) : (
-        <Space style={{ cursor: 'pointer' }} onClick={handleLogin}>
-          <LoginOutlined />
-          <Text>Login</Text>
-        </Space>
-      )}
+        )}
+      </Space>
     </AntHeader>
   );
 };

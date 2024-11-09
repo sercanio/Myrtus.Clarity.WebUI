@@ -1,8 +1,7 @@
 import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
-import { BaseQueryFn, FetchArgs } from '@reduxjs/toolkit/dist/query/react';
+import { BaseQueryFn, FetchArgs } from '@reduxjs/toolkit/query';
 import { KeycloakService } from '../services/keycloak';
-import { setAuthTokens, logout } from './slices/authSlice';
-import { RootState } from './index';
+import { setAuthTokens, logout, fetchUserProfile } from './slices/authSlice';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL,
@@ -23,36 +22,25 @@ const baseQueryWithReauth: BaseQueryFn<
   let result = await baseQuery(args, api, extraOptions);
 
   if (result.error && result.error.status === 401) {
-    // Try to get a new token
     const refreshToken = localStorage.getItem('refresh_token');
     
     if (refreshToken) {
       try {
         const tokens = await KeycloakService.refreshToken(refreshToken);
         
-        // Store the new tokens
-        localStorage.setItem('access_token', tokens.access_token);
-        localStorage.setItem('refresh_token', tokens.refresh_token);
-        
-        // Update the redux store
         api.dispatch(setAuthTokens({
           accessToken: tokens.access_token,
           refreshToken: tokens.refresh_token,
         }));
 
-        // Retry the original request
+        api.dispatch(fetchUserProfile());
+
         result = await baseQuery(args, api, extraOptions);
       } catch (error) {
-        // If refresh fails, log out the user
         api.dispatch(logout());
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
       }
     } else {
-      // No refresh token available, log out the user
       api.dispatch(logout());
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
     }
   }
 
