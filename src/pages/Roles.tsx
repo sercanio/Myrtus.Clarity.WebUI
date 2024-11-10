@@ -1,10 +1,7 @@
-function Roles() {
-  return (
-    <div>
-      <h1>Roles Management</h1>
-      {/* Add your roles management content here */}
-    </div>
-  );
-}
+import RolesManagement from '../features/roles/components/RolesManagement';
+
+const Roles = () => {
+  return <RolesManagement />;
+};
 
 export default Roles; 

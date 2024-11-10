@@ -11,9 +11,32 @@ export const userApi = api.injectEndpoints({
           pageSize
         },
       }),
-      transformResponse: (response: PaginatedResponse<User>) => response,
+      providesTags: ['User'],
+    }),
+    getUserDetails: builder.query<User, string>({
+      query: (userId) => `users/${userId}`,
+      providesTags: ['User'],
+    }),
+    updateUserRole: builder.mutation<void, {
+      userId: string;
+      roleId: string;
+      operation: 'Add' | 'Remove';
+    }>({
+      query: ({ userId, roleId, operation }) => ({
+        url: `users/${userId}/roles`,
+        method: 'PATCH',
+        body: {
+          operation,
+          roleId,
+        },
+      }),
+      invalidatesTags: ['User'],
     }),
   }),
 });
 
-export const { useGetUsersQuery } = userApi; 
+export const { 
+  useGetUsersQuery, 
+  useGetUserDetailsQuery,
+  useUpdateUserRoleMutation 
+} = userApi; 
