@@ -25,7 +25,7 @@ const baseQueryWithReauth: BaseQueryFn<
     const refreshToken = localStorage.getItem('refresh_token');
     
     if (refreshToken) {
-      try {
+      try {        
         const tokens = await KeycloakService.refreshToken(refreshToken);
         
         api.dispatch(setAuthTokens({

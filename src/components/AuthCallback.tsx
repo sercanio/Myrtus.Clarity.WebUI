@@ -15,8 +15,8 @@ export const AuthCallback = () => {
         try {
           const tokens = await KeycloakService.handleCallback(code);
           
-          localStorage.setItem('access_token', tokens.access_token);
-          localStorage.setItem('refresh_token', tokens.refresh_token);
+          /* localStorage.setItem('access_token', tokens.access_token);
+          localStorage.setItem('refresh_token', t"okens.refresh_token); */
           
           await dispatch(setAuthTokens({
             accessToken: tokens.access_token,
