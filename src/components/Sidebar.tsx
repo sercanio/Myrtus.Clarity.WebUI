@@ -3,6 +3,7 @@ import {
   UserOutlined,
   TeamOutlined,
   SettingOutlined,
+  SafetyOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -31,7 +32,7 @@ function Sidebar({ collapsed }: SidebarProps) {
         },
         {
           key: '/roles',
-          icon: <TeamOutlined />,
+          icon: <SafetyOutlined />,
           label: 'Roles',
         },
       ],
