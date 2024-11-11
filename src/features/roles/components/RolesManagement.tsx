@@ -1,19 +1,22 @@
 import { useState, useMemo } from 'react';
-import { Layout, Card, List, Checkbox, Typography, Space, Spin, message, theme } from 'antd';
+import { Layout, Card, List, Checkbox, Typography, Space, Spin, message, theme, Button, Modal, Input, Popconfirm } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
+import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import {
   useGetRolesQuery,
   useGetPermissionsQuery,
   useGetRoleDetailsQuery,
-  useUpdateRolePermissionMutation
+  useUpdateRolePermissionMutation,
+  useCreateRoleMutation,
+  useDeleteRoleMutation,
+  useUpdateRoleNameMutation
 } from '../../../store/services/roleApi';
 
 const { Sider, Content } = Layout;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const formatPermissionName = (permissionName: string): string => {
   const [feature, action] = permissionName.split(':');
-  // Capitalize first letter of action and add the feature name
   return `${action.charAt(0).toUpperCase() + action.slice(1)} ${feature}`;
 };
 
@@ -36,8 +39,17 @@ const RolesManagement = () => {
   });
   
   const [updatePermission] = useUpdateRolePermissionMutation();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newRoleName, setNewRoleName] = useState('');
+  
+  const [createRole] = useCreateRoleMutation();
+  const [deleteRole] = useDeleteRoleMutation();
 
-  // Group permissions by feature
+  const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState<{ id: string; name: string } | null>(null);
+  
+  const [updateRoleName] = useUpdateRoleNameMutation();
+
   const groupedPermissions = useMemo(() => {
     if (!permissionsData?.items) return {};
     
@@ -66,10 +78,65 @@ const RolesManagement = () => {
     }
   };
 
+  const handleCreateRole = async () => {
+    try {
+      await createRole({ name: newRoleName }).unwrap();
+      message.success('Role created successfully');
+      setIsCreateModalOpen(false);
+      setNewRoleName('');
+    } catch (error) {
+      message.error('Failed to create role');
+    }
+  };
+
+  const handleDeleteRole = async (roleId: string) => {
+    try {
+      await deleteRole(roleId).unwrap();
+      message.success('Role deleted successfully');
+      if (selectedRoleId === roleId) {
+        setSelectedRoleId(null);
+      }
+    } catch (error) {
+      message.error('Failed to delete role');
+    }
+  };
+
+  const handleEditRole = (role: { id: string; name: string }) => {
+    setEditingRole(role);
+    setIsEditNameModalOpen(true);
+  };
+
+  const handleUpdateRoleName = async () => {
+    if (!editingRole) return;
+    
+    try {
+      await updateRoleName({
+        roleId: editingRole.id,
+        name: editingRole.name,
+      }).unwrap();
+      
+      message.success('Role name updated successfully');
+      setIsEditNameModalOpen(false);
+      setEditingRole(null);
+    } catch (error) {
+      message.error('Failed to update role name');
+    }
+  };
+
   return (
     <Layout style={{ background: 'inherit' }}>
       <Sider width={300} style={{ background: 'inherit' }}>
-        <Card title="Roles" loading={isLoadingRoles}>
+        <Card 
+          title="Roles" 
+          loading={isLoadingRoles}
+          extra={
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsCreateModalOpen(true)}
+            />
+          }
+        >
           <List
             dataSource={rolesData?.items}
             renderItem={(role) => (
@@ -83,6 +150,34 @@ const RolesManagement = () => {
                   background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
                   transition: 'all 0.3s'
                 }}
+                actions={[
+                  <Space align="center" size={1}>
+                    <Button 
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditRole(role);
+                      }}
+                    />
+                    <Popconfirm
+                      title="Delete Role"
+                      description="Are you sure you want to delete this role?"
+                      onConfirm={(e) => {
+                        e?.stopPropagation();
+                        handleDeleteRole(role.id);
+                      }}
+                      onCancel={(e) => e?.stopPropagation()}
+                    >
+                      <Button 
+                        type="text" 
+                        danger 
+                        icon={<DeleteOutlined />}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </Popconfirm>
+                  </Space>
+                ]}
               >
                 <Text strong>{role.name}</Text>
               </List.Item>
@@ -124,6 +219,40 @@ const RolesManagement = () => {
           </Card>
         )}
       </Content>
+
+      <Modal
+        title="Create New Role"
+        open={isCreateModalOpen}
+        onOk={handleCreateRole}
+        onCancel={() => {
+          setIsCreateModalOpen(false);
+          setNewRoleName('');
+        }}
+        okButtonProps={{ disabled: !newRoleName.trim() }}
+      >
+        <Input
+          placeholder="Enter role name"
+          value={newRoleName}
+          onChange={(e) => setNewRoleName(e.target.value)}
+        />
+      </Modal>
+
+      <Modal
+        title="Edit Role Name"
+        open={isEditNameModalOpen}
+        onOk={handleUpdateRoleName}
+        onCancel={() => {
+          setIsEditNameModalOpen(false);
+          setEditingRole(null);
+        }}
+        okButtonProps={{ disabled: !editingRole?.name.trim() }}
+      >
+        <Input
+          placeholder="Enter new role name"
+          value={editingRole?.name || ''}
+          onChange={(e) => setEditingRole(prev => prev ? { ...prev, name: e.target.value } : null)}
+        />
+      </Modal>
     </Layout>
   );
 };

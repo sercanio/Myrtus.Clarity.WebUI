@@ -39,6 +39,35 @@ export const roleApi = api.injectEndpoints({
       }),
       invalidatesTags: ['Roles'],
     }),
+    
+    createRole: builder.mutation<Role, { name: string }>({
+      query: (body) => ({
+        url: '/roles',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Roles']
+    }),
+    
+    deleteRole: builder.mutation<void, string>({
+      query: (roleId) => ({
+        url: `/roles/${roleId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Roles']
+    }),
+    
+    updateRoleName: builder.mutation<void, {
+      roleId: string;
+      name: string;
+    }>({
+      query: ({ roleId, name }) => ({
+        url: `/roles/${roleId}/name`,
+        method: 'PATCH',
+        body: { name },
+      }),
+      invalidatesTags: ['Roles'],
+    }),
   }),
 });
 
@@ -46,5 +75,8 @@ export const {
   useGetRolesQuery,
   useGetRoleDetailsQuery,
   useGetPermissionsQuery,
-  useUpdateRolePermissionMutation
+  useUpdateRolePermissionMutation,
+  useCreateRoleMutation,
+  useDeleteRoleMutation,
+  useUpdateRoleNameMutation,
 } = roleApi; 
