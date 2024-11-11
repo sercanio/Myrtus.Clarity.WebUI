@@ -101,13 +101,12 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       <Space>
         {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
           onClick: () => setCollapsed(!collapsed),
-          style: { fontSize: '16px', cursor: 'pointer' }
+          style: { position: 'relative', top: '1.5px', fontSize: '16px', cursor: 'pointer' }
         })}
         <Tag color="cyan" style={{ margin: 0 }}>
           {modifierKey} + B
         </Tag>
       </Space>
-
       <Space>
         <Switch
           checkedChildren={<BulbOutlined />}
