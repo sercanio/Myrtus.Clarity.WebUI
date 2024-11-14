@@ -26,7 +26,7 @@ const RolesManagement = () => {
   
   const { data: rolesData, isLoading: isLoadingRoles } = useGetRolesQuery({ 
     pageIndex: 0, 
-    pageSize: 10 
+    pageSize: 10
   });
   
   const { data: permissionsData } = useGetPermissionsQuery({ 
@@ -125,7 +125,7 @@ const RolesManagement = () => {
 
   return (
     <Layout style={{ background: 'inherit' }}>
-      <Sider width={300} style={{ background: 'inherit' }}>
+      <Sider width={300} style={{background: 'inherit' }}>
         <Card 
           title="Roles" 
           loading={isLoadingRoles}
@@ -139,12 +139,13 @@ const RolesManagement = () => {
         >
           <List
             dataSource={rolesData?.items}
+            style={{maxHeight: '500px', overflow: 'auto' }}
             renderItem={(role) => (
               <List.Item
                 onClick={() => setSelectedRoleId(role.id)}
                 style={{ 
                   cursor: 'pointer',
-                  padding: '12px 24px',
+                  padding: '10px 0px 10px 12px',
                   margin: '4px 0',
                   borderRadius: token.borderRadius,
                   background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
@@ -174,6 +175,7 @@ const RolesManagement = () => {
                         danger 
                         icon={<DeleteOutlined />}
                         onClick={(e) => e.stopPropagation()}
+                        style={{marginRight: '0px', paddingRight: '0px' }}
                       />
                     </Popconfirm>
                   </Space>
@@ -185,11 +187,10 @@ const RolesManagement = () => {
           />
         </Card>
       </Sider>
-      
       <Content style={{ padding: '0 24px' }}>
         {selectedRoleId ? (
           <Card title={`Permissions for ${roleDetails?.name}`}>
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space direction="vertical" style={{ maxHeight: '500px', overflow: 'auto', width: '100%' }}>
               {Object.entries(groupedPermissions).map(([feature, permissions]) => (
                 <Card 
                   key={feature} 

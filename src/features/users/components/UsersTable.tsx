@@ -1,11 +1,15 @@
-import { useState } from 'react';
-import { Table, Card, Button, Tag, Modal, Checkbox, message, Space, Form, Input, Pagination } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation } from '../../../store/services/userApi';
+import { useState, useMemo } from 'react';
+import { Table, Card, Button, Tag, Modal, Checkbox, message, Space, Form, Input, Select, Pagination } from 'antd';
+import type { ColumnsType, TableProps } from 'antd/es/table';
+import { SearchOutlined } from '@ant-design/icons';
+import debounce from 'lodash/debounce';
+import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery } from '../../../store/services/userApi';
 import { useGetRolesQuery } from '../../../store/services/roleApi';
 import type { User } from '../../../types/user';
 import { useRegisterMutation } from '../../../store/services/accountApi';
 import { RegisterUser } from '../../../types/registerUser';
+
+const { Option } = Select;
 
 const UsersTable = () => {
     const [pageIndex, setPageIndex] = useState(0);
@@ -27,6 +31,45 @@ const UsersTable = () => {
     const { data, isLoading, refetch } = useGetUsersQuery({ pageIndex, pageSize });
 
     const [form] = Form.useForm();
+
+    const [searchText, setSearchText] = useState('');
+    const [searchField, setSearchField] = useState('firstName');
+    const [sortField, setSortField] = useState<string | null>(null);
+    const [sortDirection, setSortDirection] = useState<string | null>(null);
+
+    const buildFilterDescriptor = (text: string, field: string): FilterDescriptor | undefined => {
+        if (!text) return undefined;
+        return {
+            field,
+            operator: 'contains',
+            value: text,
+            isCaseSensitive: false
+        };
+    };
+
+    const { data: userDetailsDynamic, isFetching: isLoadingDynamic } = useGetUsersDynamicQuery({
+        pageIndex,
+        pageSize,
+        sort: sortField && sortDirection ? [{ field: sortField, dir: sortDirection }] : undefined,
+        filter: buildFilterDescriptor(searchText, searchField)
+    });
+
+    const debouncedSearch = useMemo(
+        () => debounce((value: string) => {
+            setSearchText(value);
+        }, 500),
+        []
+    );
+
+    const handleTableChange: TableProps<User>['onChange'] = (pagination, filters, sorter) => {
+        if ('field' in sorter && 'order' in sorter) {
+            setSortField(sorter.field as string);
+            setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
+        } else {
+            setSortField(null);
+            setSortDirection(null);
+        }
+    };
 
     const handleEditClick = (user: User) => {
         setSelectedUser(user);
@@ -72,12 +115,14 @@ const UsersTable = () => {
         {
             title: 'Name',
             key: 'name',
+            sorter: true,
             render: (_, record) => `${record.firstName} ${record.lastName}`,
         },
         {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            sorter: true,
         },
         {
             title: 'Roles',
@@ -111,11 +156,11 @@ const UsersTable = () => {
             form.resetFields();
             refetch();
         } catch (error: any) {
-            const errorMessage = error.data?.message 
-                || error.data?.title 
-                || error.data?.errors?.join(', ') 
+            const errorMessage = error.data?.message
+                || error.data?.title
+                || error.data?.errors?.join(', ')
                 || 'Failed to register user';
-            
+
             message.error(errorMessage);
             console.error('Registration error:', error);
         }
@@ -123,29 +168,58 @@ const UsersTable = () => {
 
     return (
         <>
-            <Card title="Users" extra={<Button type="primary" onClick={() => setRegisterUserModalVisible(true)}>New User</Button>}>
-                <div>
-                    <Table<User>
-                        columns={columns}
-                        dataSource={data?.items}
-                        loading={isLoading}
-                        rowKey="id"
-                        pagination={false}
-                    />
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                        <Pagination
-                            current={pageIndex + 1}
-                            pageSize={pageSize}
-                            total={data?.totalCount}
-                            onChange={(page, newPageSize) => {
-                                setPageIndex(page - 1);
-                                setPageSize(newPageSize);
-                            }}
-                            showSizeChanger
-                            showTotal={(total) => `Total ${total} items`}
-                            pageSizeOptions={['5', '10', '20', '50', '100']}
+            <Card
+                title="Users"
+                extra={
+                    <Button
+                        type="primary"
+                        onClick={() => setRegisterUserModalVisible(true)}
+                    >
+                        New User
+                    </Button>
+                }
+            >
+                <Space size="large"  style={{display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <Input.Group compact style={{marginBottom: 18 }}>
+                        <Select
+                            defaultValue="firstName"
+                            style={{ width: 120 }}
+                            onChange={value => setSearchField(value)}
+                        >
+                            <Option value="firstName">First Name</Option>
+                            <Option value="lastName">Last Name</Option>
+                            <Option value="email">Email</Option>
+                        </Select>
+                        <Input
+                            placeholder="Search users..."
+                            prefix={<SearchOutlined />}
+                            onChange={e => debouncedSearch(e.target.value)}
+                            style={{ width: 200 }}
                         />
-                    </div>
+                    </Input.Group>
+                </Space>
+                <Table<User>
+                    columns={columns}
+                    dataSource={userDetailsDynamic?.items}
+                    loading={isLoadingDynamic}
+                    rowKey="id"
+                    pagination={false}
+                    onChange={handleTableChange}
+                    style={{ height: '100%', maxHeight: '450px', overflow: 'auto' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                    <Pagination
+                        current={pageIndex + 1}
+                        pageSize={pageSize}
+                        total={userDetailsDynamic?.totalCount}
+                        onChange={(page, newPageSize) => {
+                            setPageIndex(page - 1);
+                            setPageSize(newPageSize);
+                        }}
+                        showSizeChanger
+                        showTotal={(total) => `Total ${total} items`}
+                        pageSizeOptions={['5', '10', '20', '50', '100']}
+                    />
                 </div>
             </Card>
             <Modal
@@ -195,7 +269,7 @@ const UsersTable = () => {
                 }}
                 footer={null}
             >
-                <Form 
+                <Form
                     form={form}
                     onFinish={handleRegisterUser}
                     layout="vertical"
@@ -206,9 +280,9 @@ const UsersTable = () => {
                     <Form.Item label="Password" name="password" rules={[{ required: true, message: 'Password is required', min: 8 }]}>
                         <Input.Password />
                     </Form.Item>
-                    <Form.Item 
-                        label="Confirm Password" 
-                        name="confirmPassword" 
+                    <Form.Item
+                        label="Confirm Password"
+                        name="confirmPassword"
                         dependencies={['password']}
                         rules={[
                             { required: true, message: 'Confirm Password is required', min: 8 },
@@ -226,7 +300,7 @@ const UsersTable = () => {
                     </Form.Item>
                     <Form.Item label="First Name" name="firstName">
                         <Input />
-                    </Form.Item> 
+                    </Form.Item>
                     <Form.Item label="Last Name" name="lastName">
                         <Input />
                     </Form.Item>
