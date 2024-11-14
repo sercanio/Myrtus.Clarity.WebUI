@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Layout, Card, List, Checkbox, Typography, Space, Spin, message, theme, Button, Modal, Input, Popconfirm } from 'antd';
+import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import {
@@ -84,8 +84,14 @@ const RolesManagement = () => {
       message.success('Role created successfully');
       setIsCreateModalOpen(false);
       setNewRoleName('');
-    } catch (error) {
-      message.error('Failed to create role');
+    } catch (error: any) {
+      if (error.data?.errors) {
+        error.data.errors.forEach((errorMessage: string) => {
+          message.error(errorMessage);
+        });
+      } else {
+        message.error('Failed to create role');
+      }
     }
   };
 

@@ -5,7 +5,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import debounce from 'lodash/debounce';
 import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery } from '../../../store/services/userApi';
 import { useGetRolesQuery } from '../../../store/services/roleApi';
-import type { User } from '../../../types/user';
+import type { Role, User } from '../../../types/user';
 import { useRegisterMutation } from '../../../store/services/accountApi';
 import { RegisterUser } from '../../../types/registerUser';
 
@@ -18,17 +18,17 @@ const UsersTable = () => {
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
-    const [hasChanges, setHasChanges] = useState(false);
+    const [, setHasChanges] = useState(false);
     const [registerUser] = useRegisterMutation();
     const { data: rolesData } = useGetRolesQuery({ pageIndex: 0, pageSize: 100 });
     const roles = rolesData?.items ?? [];
 
-    const { data: userDetails } = useGetUserDetailsQuery(selectedUser?.id ?? '', {
+    useGetUserDetailsQuery(selectedUser?.id ?? '', {
         skip: !selectedUser,
     });
 
     const [updateUserRole] = useUpdateUserRoleMutation();
-    const { data, isLoading, refetch } = useGetUsersQuery({ pageIndex, pageSize });
+    const { refetch } = useGetUsersQuery({ pageIndex, pageSize });
 
     const [form] = Form.useForm();
 
@@ -36,6 +36,13 @@ const UsersTable = () => {
     const [searchField, setSearchField] = useState('firstName');
     const [sortField, setSortField] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<string | null>(null);
+
+    interface FilterDescriptor {
+        field: string;
+        operator: string;
+        value: string;
+        isCaseSensitive: boolean;
+    }
 
     const buildFilterDescriptor = (text: string, field: string): FilterDescriptor | undefined => {
         if (!text) return undefined;
@@ -61,7 +68,7 @@ const UsersTable = () => {
         []
     );
 
-    const handleTableChange: TableProps<User>['onChange'] = (pagination, filters, sorter) => {
+    const handleTableChange: TableProps<User>['onChange'] = (_pagination, _filters, sorter) => {
         if ('field' in sorter && 'order' in sorter) {
             setSortField(sorter.field as string);
             setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
@@ -101,7 +108,7 @@ const UsersTable = () => {
 
             setSelectedUser({
                 ...selectedUser,
-                roles: updatedRoles.filter(Boolean)
+                roles: updatedRoles.filter((role): role is Role => role !== undefined)
             });
 
             message.success(`Role ${checked ? 'added' : 'removed'} successfully`);

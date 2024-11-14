@@ -32,11 +32,11 @@ export const userApi = api.injectEndpoints({
           pageSize
         },
       }),
-      providesTags: ['User'],
+      providesTags: ['Users'],
     }),
     getUserDetails: builder.query<User, string>({
       query: (userId) => `users/${userId}`,
-      providesTags: ['User'],
+      providesTags: ['Users'],
     }),
     updateUserRole: builder.mutation<void, {
       userId: string;
@@ -51,7 +51,7 @@ export const userApi = api.injectEndpoints({
           roleId,
         },
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ['Users'],
     }),
     getUsersDynamic: builder.query<PaginatedResponse<User>, DynamicQuery>({
       query: (params) => ({
@@ -66,7 +66,7 @@ export const userApi = api.injectEndpoints({
           filter: params.filter
         }
       }),
-      providesTags: ['User'],
+      providesTags: ['Users'],
     }),
   }),
 });

@@ -11,7 +11,7 @@ import useLocalStorage from './hooks/useLocalStorage';
 const { Content } = Layout;
 
 function App() {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('theme-preference', false);
 
   useEffect(() => {

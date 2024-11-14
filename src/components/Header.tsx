@@ -16,7 +16,6 @@ import {
 import { KeycloakService } from '../services/keycloak';
 import { logout } from '../store/slices/authSlice';
 import type { RootState } from '../store';
-import { useEffect } from 'react';
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -32,10 +31,6 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, userProfile } = useSelector((state: RootState) => state.auth);
-
-  useEffect(() => {
-    console.log('Auth state:', { isAuthenticated, userProfile });
-  }, [isAuthenticated, userProfile]);
 
   const handleLogin = () => {
     KeycloakService.login();
