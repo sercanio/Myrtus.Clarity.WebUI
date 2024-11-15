@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm } from 'antd';
+import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm, Grid, Collapse } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import {
@@ -14,6 +14,7 @@ import {
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
+const { Panel } = Collapse;
 
 const formatPermissionName = (permissionName: string): string => {
   const [feature, action] = permissionName.split(':');
@@ -23,6 +24,8 @@ const formatPermissionName = (permissionName: string): string => {
 const RolesManagement = () => {
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const { token } = theme.useToken();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
   
   const { data: rolesData, isLoading: isLoadingRoles } = useGetRolesQuery({ 
     pageIndex: 0, 
@@ -130,70 +133,72 @@ const RolesManagement = () => {
   };
 
   return (
-    <Layout style={{ background: 'inherit' }}>
-      <Sider width={300} style={{background: 'inherit' }}>
-        <Card 
-          title="Roles" 
-          loading={isLoadingRoles}
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsCreateModalOpen(true)}
-            />
-          }
-        >
-          <List
-            dataSource={rolesData?.items}
-            style={{maxHeight: '500px', overflow: 'auto' }}
-            renderItem={(role) => (
-              <List.Item
-                onClick={() => setSelectedRoleId(role.id)}
-                style={{ 
-                  cursor: 'pointer',
-                  padding: '10px 0px 10px 12px',
-                  margin: '4px 0',
-                  borderRadius: token.borderRadius,
-                  background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
-                  transition: 'all 0.3s'
-                }}
-                actions={[
-                  <Space align="center" size={1}>
-                    <Button 
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditRole(role);
-                      }}
-                    />
-                    <Popconfirm
-                      title="Delete Role"
-                      description="Are you sure you want to delete this role?"
-                      onConfirm={(e) => {
-                        e?.stopPropagation();
-                        handleDeleteRole(role.id);
-                      }}
-                      onCancel={(e) => e?.stopPropagation()}
-                    >
+    <Layout style={{ background: 'inherit', flexDirection: screens.md ? 'row' : 'column' }}>
+      <Sider width={screens.md ? 300 : '100%'} style={{ background: 'inherit', marginBottom: screens.md ? 0 : 16 }}>
+        <Collapse defaultActiveKey={['1']} style={{ background: 'inherit' }}>
+          <Panel 
+            header={selectedRoleId ? `Selected Role: ${rolesData?.items.find(role => role.id === selectedRoleId)?.name}` : "Roles"} 
+            key="1" 
+            extra={
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setIsCreateModalOpen(true)}
+              />
+            }
+          >
+            <List
+              dataSource={rolesData?.items}
+              style={{ maxHeight: '500px', overflow: 'auto' }}
+              renderItem={(role) => (
+                <List.Item
+                  onClick={() => setSelectedRoleId(role.id)}
+                  style={{ 
+                    cursor: 'pointer',
+                    padding: '10px 0px 10px 12px',
+                    margin: '4px 0',
+                    borderRadius: token.borderRadius,
+                    background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
+                    transition: 'all 0.3s'
+                  }}
+                  actions={[
+                    <Space align="center" size={1}>
                       <Button 
-                        type="text" 
-                        danger 
-                        icon={<DeleteOutlined />}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{marginRight: '0px', paddingRight: '0px' }}
+                        type="text"
+                        icon={<EditOutlined />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditRole(role);
+                        }}
                       />
-                    </Popconfirm>
-                  </Space>
-                ]}
-              >
-                <Text strong>{role.name}</Text>
-              </List.Item>
-            )}
-          />
-        </Card>
+                      <Popconfirm
+                        title="Delete Role"
+                        description="Are you sure you want to delete this role?"
+                        onConfirm={(e) => {
+                          e?.stopPropagation();
+                          handleDeleteRole(role.id);
+                        }}
+                        onCancel={(e) => e?.stopPropagation()}
+                      >
+                        <Button 
+                          type="text" 
+                          danger 
+                          icon={<DeleteOutlined />}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ marginRight: '0px', paddingRight: '0px' }}
+                        />
+                      </Popconfirm>
+                    </Space>
+                  ]}
+                >
+                  <Text strong>{role.name}</Text>
+                </List.Item>
+              )}
+            />
+          </Panel>
+        </Collapse>
       </Sider>
-      <Content style={{ padding: '0 24px' }}>
+      <Content style={{ padding: screens.md ? '0 24px' : '0', width: '100%' }}>
         {selectedRoleId ? (
           <Card title={`Permissions for ${roleDetails?.name}`}>
             <Space direction="vertical" style={{ maxHeight: '500px', overflow: 'auto', width: '100%' }}>
@@ -264,4 +269,4 @@ const RolesManagement = () => {
   );
 };
 
-export default RolesManagement; 
+export default RolesManagement;

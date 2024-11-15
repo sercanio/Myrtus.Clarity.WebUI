@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Avatar, Dropdown, Switch, Space, Tag, Typography } from 'antd';
@@ -31,6 +31,15 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, userProfile } = useSelector((state: RootState) => state.auth);
+  const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsXLScreen(window.innerWidth >= 1200);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogin = () => {
     KeycloakService.login();
@@ -98,9 +107,11 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
           onClick: () => setCollapsed(!collapsed),
           style: { position: 'relative', top: '1.5px', fontSize: '16px', cursor: 'pointer' }
         })}
-        <Tag color="cyan" style={{ margin: 0 }}>
-          {modifierKey} + B
-        </Tag>
+        {isXLScreen && (
+          <Tag color="cyan" style={{ margin: 0 }}>
+            {modifierKey} + B
+          </Tag>
+        )}
       </Space>
       <Space>
         <Switch

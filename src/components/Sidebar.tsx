@@ -1,4 +1,5 @@
-import { Layout, Menu, theme } from 'antd';
+import { useEffect } from 'react';
+import { Layout, Menu, theme, Grid } from 'antd';
 import {
   UserOutlined,
   TeamOutlined,
@@ -9,15 +10,18 @@ import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const { Sider } = Layout;
+const { useBreakpoint } = Grid;
 
 interface SidebarProps {
   collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
 }
 
-function Sidebar({ collapsed }: SidebarProps) {
+function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
+  const screens = useBreakpoint();
 
   const items: MenuProps['items'] = [
     {
@@ -48,21 +52,50 @@ function Sidebar({ collapsed }: SidebarProps) {
     navigate(e.key);
   };
 
+  useEffect(() => {
+    const handleTouchOutside = (event: TouchEvent | MouseEvent) => {
+      if (!screens.xxl && !collapsed) {
+        const sidebarElement = document.querySelector('.ant-layout-sider');
+        if (sidebarElement && !sidebarElement.contains(event.target as Node)) {
+          setCollapsed(true);
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchOutside);
+    document.addEventListener('mousedown', handleTouchOutside);
+    return () => {
+      document.removeEventListener('touchstart', handleTouchOutside);
+      document.removeEventListener('mousedown', handleTouchOutside);
+    };
+  }, [collapsed, screens.lg, screens.xxl, setCollapsed]);
+
   return (
-    <Sider 
-      trigger={null} 
-      collapsible 
+    <Sider
+      trigger={null}
+      collapsible
       collapsed={collapsed}
       width={266}
-      collapsedWidth={80}
+      collapsedWidth={screens.xl ? 80 : 0}
+      breakpoint="xl"
+      onBreakpoint={(broken) => {
+        if (broken) {
+          setCollapsed(true);
+        }
+      }}
       style={{
+        position: screens.xl ? 'static' : 'fixed',
+        top: 0,
+        left: 0,
+        minHeight: '100vh',
         background: token.colorBgContainer,
-        borderRight: `1px solid ${token.colorBorderSecondary}`
+        borderRight: `1px solid ${token.colorBorderSecondary}`,
+        zIndex: 10
       }}
     >
-      <div style={{ 
-        height: 32, 
-        margin: 16, 
+      <div style={{
+        height: 32,
+        margin: 16,
         background: token.colorPrimary,
         opacity: 0.2
       }} />

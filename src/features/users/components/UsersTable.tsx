@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Table, Card, Button, Tag, message, Space, Form, Pagination } from 'antd';
+import { Table, Card, Button, Tag, message, Space, Form, Pagination, Grid } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import debounce from 'lodash/debounce';
 import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery, useGetUsersByRoleQuery } from '../../../store/services/userApi';
@@ -10,6 +10,7 @@ import { RegisterUser } from '../../../types/registerUser';
 import { UserSearchFilters } from './UserSearchFilters';
 import { EditUserModal } from './EditUserModal';
 import { RegisterUserModal } from './RegisterUserModal';
+import type { ErrorResponse } from '../../../types/errorResponse';
 
 const UsersTable = () => {
     const [pageIndex, setPageIndex] = useState(0);
@@ -128,7 +129,7 @@ const UsersTable = () => {
             });
 
             message.success(`Role ${checked ? 'added' : 'removed'} successfully`);
-        } catch (error) {
+        } catch {
             message.error(`Failed to ${checked ? 'add' : 'remove'} role`);
         }
     };
@@ -177,15 +178,18 @@ const UsersTable = () => {
             setRegisterUserModalVisible(false);
             form.resetFields();
             refetch();
-        } catch (error: any) {
-            const errorMessage = error.data?.message
-                || error.data?.title
-                || error.data?.errors?.join(', ')
+        } catch (error: unknown) {
+            const errorMessage = (error as ErrorResponse).data?.message
+                || (error as ErrorResponse).data?.title
+                || (error as ErrorResponse).data?.errors?.join(', ')
                 || 'Failed to register user';
 
             message.error(errorMessage);
         }
     };
+    
+    const { useBreakpoint } = Grid;
+    const screens = useBreakpoint();
 
     return (
         <>
@@ -199,6 +203,16 @@ const UsersTable = () => {
                         New User
                     </Button>
                 }
+                style={{
+                    margin: screens.xs ? '2px 0px' : '2px 16px',
+                    padding: screens.xs ? '4px 0px' : '4px',
+                }}
+                bodyStyle={{
+                    padding: screens.xs ? '4px' : '16px',
+                }}
+                headStyle={{
+                    padding: screens.xs ? '4px 6px' : '4px',
+                }}
             >
                 <UserSearchFilters
                     onSearchFieldChange={setSearchField}
@@ -214,7 +228,10 @@ const UsersTable = () => {
                     rowKey="id"
                     pagination={false}
                     onChange={handleTableChange}
-                    style={{ height: '100%', maxHeight: '450px', overflow: 'auto' }}
+                    style={{
+                        width: '100%',
+                        overflowX: 'auto',
+                    }}
                 />
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
@@ -226,9 +243,7 @@ const UsersTable = () => {
                             setPageIndex(page - 1);
                             setPageSize(newPageSize);
                         }}
-                        showSizeChanger
-                        showTotal={(total) => `Total ${total} items`}
-                        pageSizeOptions={['5', '10', '20', '50', '100']}
+                        responsive
                     />
                 </div>
             </Card>
