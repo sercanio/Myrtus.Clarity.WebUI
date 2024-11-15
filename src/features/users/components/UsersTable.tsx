@@ -1,15 +1,15 @@
 import { useState, useMemo } from 'react';
-import { Table, Card, Button, Tag, Modal, Checkbox, message, Space, Form, Input, Select, Pagination } from 'antd';
+import { Table, Card, Button, Tag, message, Space, Form, Pagination } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { SearchOutlined } from '@ant-design/icons';
 import debounce from 'lodash/debounce';
-import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery } from '../../../store/services/userApi';
+import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery, useGetUsersByRoleQuery } from '../../../store/services/userApi';
 import { useGetRolesQuery } from '../../../store/services/roleApi';
 import type { Role, User } from '../../../types/user';
 import { useRegisterMutation } from '../../../store/services/accountApi';
 import { RegisterUser } from '../../../types/registerUser';
-
-const { Option } = Select;
+import { UserSearchFilters } from './UserSearchFilters';
+import { EditUserModal } from './EditUserModal';
+import { RegisterUserModal } from './RegisterUserModal';
 
 const UsersTable = () => {
     const [pageIndex, setPageIndex] = useState(0);
@@ -36,6 +36,7 @@ const UsersTable = () => {
     const [searchField, setSearchField] = useState('firstName');
     const [sortField, setSortField] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<string | null>(null);
+    const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>();
 
     interface FilterDescriptor {
         field: string;
@@ -54,12 +55,27 @@ const UsersTable = () => {
         };
     };
 
-    const { data: userDetailsDynamic, isFetching: isLoadingDynamic } = useGetUsersDynamicQuery({
+    const {
+        data: usersByRole,
+        isFetching: isLoadingUsersByRole
+    } = useGetUsersByRoleQuery({
+        roleId: selectedRoleId!,
+        pageIndex,
+        pageSize,
+    }, { skip: !selectedRoleId });
+
+    const {
+        data: userDetailsDynamic,
+        isFetching: isLoadingDynamic
+    } = useGetUsersDynamicQuery({
         pageIndex,
         pageSize,
         sort: sortField && sortDirection ? [{ field: sortField, dir: sortDirection }] : undefined,
         filter: buildFilterDescriptor(searchText, searchField)
-    });
+    }, { skip: !!selectedRoleId });
+
+    const userData = selectedRoleId ? usersByRole : userDetailsDynamic;
+    const isLoading = selectedRoleId ? isLoadingUsersByRole : isLoadingDynamic;
 
     const debouncedSearch = useMemo(
         () => debounce((value: string) => {
@@ -114,7 +130,6 @@ const UsersTable = () => {
             message.success(`Role ${checked ? 'added' : 'removed'} successfully`);
         } catch (error) {
             message.error(`Failed to ${checked ? 'add' : 'remove'} role`);
-            console.error('Failed to update role:', error);
         }
     };
 
@@ -169,7 +184,6 @@ const UsersTable = () => {
                 || 'Failed to register user';
 
             message.error(errorMessage);
-            console.error('Registration error:', error);
         }
     };
 
@@ -186,39 +200,28 @@ const UsersTable = () => {
                     </Button>
                 }
             >
-                <Space size="large"  style={{display: 'flex', justifyContent: 'center', width: '100%' }}>
-                    <Input.Group compact style={{marginBottom: 18 }}>
-                        <Select
-                            defaultValue="firstName"
-                            style={{ width: 120 }}
-                            onChange={value => setSearchField(value)}
-                        >
-                            <Option value="firstName">First Name</Option>
-                            <Option value="lastName">Last Name</Option>
-                            <Option value="email">Email</Option>
-                        </Select>
-                        <Input
-                            placeholder="Search users..."
-                            prefix={<SearchOutlined />}
-                            onChange={e => debouncedSearch(e.target.value)}
-                            style={{ width: 200 }}
-                        />
-                    </Input.Group>
-                </Space>
+                <UserSearchFilters
+                    onSearchFieldChange={setSearchField}
+                    onSearchTextChange={debouncedSearch}
+                    onRoleFilterChange={setSelectedRoleId}
+                    selectedRoleId={selectedRoleId}
+                    roles={rolesData?.items}
+                />
                 <Table<User>
                     columns={columns}
-                    dataSource={userDetailsDynamic?.items}
-                    loading={isLoadingDynamic}
+                    dataSource={userData?.items}
+                    loading={isLoading}
                     rowKey="id"
                     pagination={false}
                     onChange={handleTableChange}
                     style={{ height: '100%', maxHeight: '450px', overflow: 'auto' }}
                 />
+
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
                     <Pagination
                         current={pageIndex + 1}
                         pageSize={pageSize}
-                        total={userDetailsDynamic?.totalCount}
+                        total={userData?.totalCount}
                         onChange={(page, newPageSize) => {
                             setPageIndex(page - 1);
                             setPageSize(newPageSize);
@@ -229,95 +232,19 @@ const UsersTable = () => {
                     />
                 </div>
             </Card>
-            <Modal
-                title="Edit User Roles"
-                open={editModalVisible}
-                onCancel={() => setEditModalVisible(false)}
-                footer={[
-                    <Button key="close" onClick={() => setEditModalVisible(false)}>
-                        Close
-                    </Button>,
-                ]}
-            >
-                {selectedUser && (
-                    <>
-                        <div style={{ marginBottom: 16 }}>
-                            <div >
-                                <strong>Name: </strong>
-                                &nbsp;{selectedUser.firstName} {selectedUser.lastName}
-                            </div>
-                            <div>
-                                <strong>Email: </strong>
-                                &nbsp;{selectedUser.email}
-                            </div>
-                        </div>
-                        <div>
-                            <strong>Roles:</strong>
-                            {roles.map((role) => (
-                                <div key={role.id} style={{ marginTop: 8 }}>
-                                    <Checkbox
-                                        checked={selectedRoles.has(role.id)}
-                                        onChange={(e) => handleRoleChange(role.id, e.target.checked)}
-                                    >
-                                        {role.name}
-                                    </Checkbox>
-                                </div>
-                            ))}
-                        </div>
-                    </>
-                )}
-            </Modal>
-            <Modal
-                title="Register User"
-                open={registerUserModalVisible}
-                onCancel={() => {
-                    setRegisterUserModalVisible(false);
-                    form.resetFields();
-                }}
-                footer={null}
-            >
-                <Form
-                    form={form}
-                    onFinish={handleRegisterUser}
-                    layout="vertical"
-                >
-                    <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Email is required', type: 'email' }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Password" name="password" rules={[{ required: true, message: 'Password is required', min: 8 }]}>
-                        <Input.Password />
-                    </Form.Item>
-                    <Form.Item
-                        label="Confirm Password"
-                        name="confirmPassword"
-                        dependencies={['password']}
-                        rules={[
-                            { required: true, message: 'Confirm Password is required', min: 8 },
-                            ({ getFieldValue }) => ({
-                                validator(_, value) {
-                                    if (!value || getFieldValue('password') === value) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Passwords do not match'));
-                                },
-                            }),
-                        ]}
-                    >
-                        <Input.Password />
-                    </Form.Item>
-                    <Form.Item label="First Name" name="firstName">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Last Name" name="lastName">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" block>
-                            Register
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Modal>
+            <EditUserModal
+                visible={editModalVisible}
+                onClose={() => setEditModalVisible(false)}
+                selectedUser={selectedUser}
+                roles={roles}
+                selectedRoles={selectedRoles}
+                onRoleChange={handleRoleChange}
+            />
+            <RegisterUserModal
+                visible={registerUserModalVisible}
+                onClose={() => setRegisterUserModalVisible(false)}
+                onRegister={handleRegisterUser}
+            />
         </>
     );
 };

@@ -68,6 +68,20 @@ export const userApi = api.injectEndpoints({
       }),
       providesTags: ['Users'],
     }),
+    getUsersByRole: builder.query<PaginatedResponse<User>, { 
+      roleId: string; 
+      pageIndex: number; 
+      pageSize: number;
+    }>({
+      query: ({ roleId, pageIndex, pageSize }) => ({
+        url: `users/roles/${roleId}`,
+        params: {
+          pageIndex,
+          pageSize,
+        },
+      }),
+      providesTags: ['Users'],
+    }),
   }),
 });
 
@@ -75,5 +89,6 @@ export const {
   useGetUsersQuery, 
   useGetUserDetailsQuery,
   useUpdateUserRoleMutation,
-  useGetUsersDynamicQuery
+  useGetUsersDynamicQuery,
+  useGetUsersByRoleQuery
 } = userApi; 
