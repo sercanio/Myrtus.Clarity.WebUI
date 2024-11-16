@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Table, Card, Button, Tag, message, Space, Form, Pagination, Grid } from 'antd';
+import { Table, Card, Button, Tag, message, Space, Form, Pagination, Grid, Select } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import debounce from 'lodash/debounce';
 import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery, useGetUsersByRoleQuery } from '../../../store/services/userApi';
@@ -234,7 +234,7 @@ const UsersTable = () => {
                     }}
                 />
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: 16 }}>
                     <Pagination
                         current={pageIndex + 1}
                         pageSize={pageSize}
@@ -245,6 +245,17 @@ const UsersTable = () => {
                         }}
                         responsive
                     />
+                    <Select
+                        value={pageSize}
+                        onChange={(value) => setPageSize(value)}
+                        style={{ width: 100, marginLeft: 16 }}
+                    >
+                        <Select.Option value={5}>5 / page</Select.Option>
+                        <Select.Option value={10}>10 / page</Select.Option>
+                        <Select.Option value={20}>20 / page</Select.Option>
+                        <Select.Option value={50}>50 / page</Select.Option>
+                        <Select.Option value={100}>100 / page</Select.Option>
+                    </Select>
                 </div>
             </Card>
             <EditUserModal
