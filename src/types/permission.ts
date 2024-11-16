@@ -7,6 +7,7 @@ export interface Permission {
 export interface Role {
   id: string;
   name: string;
+  isDefault: boolean;
   permissions?: Permission[];
 }
 

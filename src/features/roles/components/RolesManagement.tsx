@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm, Grid, Collapse } from 'antd';
+import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm, Grid, Collapse, Tag } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import {
@@ -26,36 +26,36 @@ const RolesManagement = () => {
   const { token } = theme.useToken();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
-  
-  const { data: rolesData, isLoading: isLoadingRoles } = useGetRolesQuery({ 
-    pageIndex: 0, 
+
+  const { data: rolesData, isLoading: isLoadingRoles } = useGetRolesQuery({
+    pageIndex: 0,
     pageSize: 10
   });
-  
-  const { data: permissionsData } = useGetPermissionsQuery({ 
-    pageIndex: 0, 
-    pageSize: 100 
+
+  const { data: permissionsData } = useGetPermissionsQuery({
+    pageIndex: 0,
+    pageSize: 100
   });
-  
-  const { data: roleDetails } = useGetRoleDetailsQuery(selectedRoleId!, { 
-    skip: !selectedRoleId 
+
+  const { data: roleDetails } = useGetRoleDetailsQuery(selectedRoleId!, {
+    skip: !selectedRoleId
   });
-  
+
   const [updatePermission] = useUpdateRolePermissionMutation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
-  
+
   const [createRole] = useCreateRoleMutation();
   const [deleteRole] = useDeleteRoleMutation();
 
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<{ id: string; name: string } | null>(null);
-  
+
   const [updateRoleName] = useUpdateRoleNameMutation();
 
   const groupedPermissions = useMemo(() => {
     if (!permissionsData?.items) return {};
-    
+
     return permissionsData.items.reduce((acc, permission) => {
       if (!acc[permission.feature]) {
         acc[permission.feature] = [];
@@ -74,9 +74,9 @@ const RolesManagement = () => {
         permissionId,
         operation: checked ? 'Add' : 'Remove'
       }).unwrap();
-      
+
       message.success(`Permission ${checked ? 'added to' : 'removed from'} role`);
-    } catch (error) {
+    } catch {
       message.error('Failed to update permission');
     }
   };
@@ -105,8 +105,14 @@ const RolesManagement = () => {
       if (selectedRoleId === roleId) {
         setSelectedRoleId(null);
       }
-    } catch (error) {
-      message.error('Failed to delete role');
+    } catch (error: any) {
+      if (error.status === 403 && error.data?.errors) {
+        error.data.errors.forEach((errorMessage: string) => {
+          message.error(errorMessage);
+        });
+      } else {
+        message.error('Failed to delete role');
+      }
     }
   };
 
@@ -117,17 +123,17 @@ const RolesManagement = () => {
 
   const handleUpdateRoleName = async () => {
     if (!editingRole) return;
-    
+
     try {
       await updateRoleName({
         roleId: editingRole.id,
         name: editingRole.name,
       }).unwrap();
-      
+
       message.success('Role name updated successfully');
       setIsEditNameModalOpen(false);
       setEditingRole(null);
-    } catch (error) {
+    } catch {
       message.error('Failed to update role name');
     }
   };
@@ -136,9 +142,9 @@ const RolesManagement = () => {
     <Layout style={{ background: 'inherit', flexDirection: screens.md ? 'row' : 'column' }}>
       <Sider width={screens.md ? 300 : '100%'} style={{ background: 'inherit', marginBottom: screens.md ? 0 : 16 }}>
         <Collapse defaultActiveKey={['1']} style={{ background: 'inherit' }}>
-          <Panel 
-            header={selectedRoleId ? `Selected Role: ${rolesData?.items.find(role => role.id === selectedRoleId)?.name}` : "Roles"} 
-            key="1" 
+          <Panel
+            header={selectedRoleId ? `Selected Role: ${rolesData?.items.find(role => role.id === selectedRoleId)?.name}` : "Roles"}
+            key="1"
             extra={
               <Button
                 type="primary"
@@ -153,7 +159,7 @@ const RolesManagement = () => {
               renderItem={(role) => (
                 <List.Item
                   onClick={() => setSelectedRoleId(role.id)}
-                  style={{ 
+                  style={{
                     cursor: 'pointer',
                     padding: '10px 0px 10px 12px',
                     margin: '4px 0',
@@ -163,7 +169,7 @@ const RolesManagement = () => {
                   }}
                   actions={[
                     <Space align="center" size={1}>
-                      <Button 
+                      <Button
                         type="text"
                         icon={<EditOutlined />}
                         onClick={(e) => {
@@ -171,27 +177,32 @@ const RolesManagement = () => {
                           handleEditRole(role);
                         }}
                       />
-                      <Popconfirm
-                        title="Delete Role"
-                        description="Are you sure you want to delete this role?"
-                        onConfirm={(e) => {
-                          e?.stopPropagation();
-                          handleDeleteRole(role.id);
-                        }}
-                        onCancel={(e) => e?.stopPropagation()}
-                      >
-                        <Button 
-                          type="text" 
-                          danger 
-                          icon={<DeleteOutlined />}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ marginRight: '0px', paddingRight: '0px' }}
-                        />
-                      </Popconfirm>
+                      {!role.isDefault && (
+                        <Popconfirm
+                          title="Delete Role"
+                          description="Are you sure you want to delete this role?"
+                          onConfirm={(e) => {
+                            e?.stopPropagation();
+                            handleDeleteRole(role.id);
+                          }}
+                          onCancel={(e) => e?.stopPropagation()}
+                        >
+                          <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ marginRight: '0px', paddingRight: '0px' }}
+                          />
+                        </Popconfirm>
+                      )}
                     </Space>
                   ]}
                 >
-                  <Text strong>{role.name}</Text>
+                  <Space align="center" size={1}>
+                    <Text strong>{role.name}</Text>
+                    {role.isDefault && <Tag color="blue" style={{ marginLeft: 4, fontSize: '75%' }}>Default</Tag>}
+                  </Space>
                 </List.Item>
               )}
             />
@@ -203,9 +214,9 @@ const RolesManagement = () => {
           <Card title={`Permissions for ${roleDetails?.name}`}>
             <Space direction="vertical" style={{ maxHeight: '500px', overflow: 'auto', width: '100%' }}>
               {Object.entries(groupedPermissions).map(([feature, permissions]) => (
-                <Card 
-                  key={feature} 
-                  size="small" 
+                <Card
+                  key={feature}
+                  size="small"
                   title={<Text strong style={{ textTransform: 'capitalize' }}>{feature}</Text>}
                 >
                   <Space direction="vertical">
@@ -213,7 +224,7 @@ const RolesManagement = () => {
                       <Checkbox
                         key={permission.id}
                         checked={roleDetails?.permissions?.some(p => p.id === permission.id)}
-                        onChange={(e: CheckboxChangeEvent) => 
+                        onChange={(e: CheckboxChangeEvent) =>
                           handlePermissionChange(permission.id, e.target.checked)
                         }
                       >
