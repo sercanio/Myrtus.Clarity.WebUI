@@ -54,7 +54,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
 
   useEffect(() => {
     const handleTouchOutside = (event: TouchEvent | MouseEvent) => {
-      if (!screens.xxl && !collapsed) {
+      if ((!screens.xxl && !screens.xl) && !collapsed) {
         const sidebarElement = document.querySelector('.ant-layout-sider');
         if (sidebarElement && !sidebarElement.contains(event.target as Node)) {
           setCollapsed(true);
