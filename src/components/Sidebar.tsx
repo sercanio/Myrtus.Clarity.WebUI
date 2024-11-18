@@ -5,6 +5,7 @@ import {
   TeamOutlined,
   SettingOutlined,
   SafetyOutlined,
+  FileSearchOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -40,6 +41,11 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
           label: 'Roles',
         },
       ],
+    },
+    {
+      key: '/activity-monitor',
+      icon: <FileSearchOutlined />,
+      label: 'Activity Monitor',
     },
     {
       key: '/settings',

@@ -149,7 +149,10 @@ const RolesManagement = () => {
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
-                onClick={() => setIsCreateModalOpen(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCreateModalOpen(true);
+                }}
               />
             }
           >
