@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Select, message, Grid } from 'antd';
+import { Table, Select, message, Grid, Card } from 'antd';
 import Title from 'antd/es/typography/Title';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import type { ColumnsType } from 'antd/es/table';
@@ -85,22 +85,35 @@ const ActivityMonitor: React.FC = () => {
     }, [logSize]);
 
     return (
-        <div style={{ padding: screens.xs ? '8px' : '16px' }}>
-            <Title level={2}>Activity Monitor</Title>
-            <Select
-                defaultValue={10}
-                style={{ width: screens.xs ? '100%' : 120, margin: '16px 0' }}
-                onChange={(value) => setLogSize(value)}
-            >
-                <Option value={10}>10 logs</Option>
-                <Option value={20}>20 logs</Option>
-                <Option value={50}>50 logs</Option>
-                <Option value={100}>100 logs</Option>
-            </Select>
-            <div style={{ overflowX: 'auto' }}>
-                <Table columns={columns} dataSource={logs} pagination={false} rowKey="Id" />
+        <Card
+            title="Realtime Activity Monitor"
+            style={{
+                margin: screens.xs ? '2px 0px' : '2px 16px',
+                padding: screens.xs ? '4px 0px' : '4px',
+            }}
+            bodyStyle={{
+                padding: screens.xs ? '4px' : '16px',
+            }}
+            headStyle={{
+                padding: screens.xs ? '4px 6px' : '4px',
+            }}
+        >
+            <div style={{ padding: screens.xs ? '8px' : '16px' }}>
+                <Select
+                    defaultValue={10}
+                    style={{ width: screens.xs ? '100%' : 120, margin: '16px 0' }}
+                    onChange={(value) => setLogSize(value)}
+                >
+                    <Option value={10}>10 logs</Option>
+                    <Option value={20}>20 logs</Option>
+                    <Option value={50}>50 logs</Option>
+                    <Option value={100}>100 logs</Option>
+                </Select>
+                <div style={{ overflowX: 'auto' }}>
+                    <Table columns={columns} dataSource={logs} pagination={false} rowKey="Id" />
+                </div>
             </div>
-        </div>
+        </Card>
     );
 };
 

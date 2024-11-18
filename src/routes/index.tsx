@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import AuditLog from '../pages/AuditLog';
 import ActivityMonitor from '../pages/ActivityMonitor';
+import AuditLogs from '../pages/AuditLogs';
 
 // Define role constants
 const ROLES = {
@@ -74,16 +75,7 @@ function AppRoutes() {
         path="/audit-logs" 
         element={
           <ProtectedRoute requiredRoles={[ROLES.ADMIN]}>
-            <AuditLog />
-          </ProtectedRoute>
-        } 
-      />
-
-      <Route 
-        path="/activity-monitor" 
-        element={
-          <ProtectedRoute requiredRoles={[ROLES.ADMIN]}>
-            <ActivityMonitor />
+            <AuditLogs />
           </ProtectedRoute>
         } 
       />

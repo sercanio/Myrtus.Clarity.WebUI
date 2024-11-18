@@ -43,9 +43,9 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
       ],
     },
     {
-      key: '/activity-monitor',
+      key: '/audit-logs',
       icon: <FileSearchOutlined />,
-      label: 'Activity Monitor',
+      label: 'Audit Logs',
     },
     {
       key: '/settings',
