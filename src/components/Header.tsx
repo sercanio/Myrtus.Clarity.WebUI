@@ -1,6 +1,7 @@
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Typography } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Typography } from 'antd';
 import type { MenuProps } from 'antd';
 import { 
   UserOutlined, 
@@ -8,12 +9,13 @@ import {
   LogoutOutlined,
   LoginOutlined,
   BulbOutlined,
-  BulbFilled
+  BulbFilled,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined
 } from '@ant-design/icons';
 import { KeycloakService } from '../services/keycloak';
 import { logout } from '../store/slices/authSlice';
 import type { RootState } from '../store';
-import { useEffect } from 'react';
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -29,10 +31,15 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, userProfile } = useSelector((state: RootState) => state.auth);
+  const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
 
   useEffect(() => {
-    console.log('Auth state:', { isAuthenticated, userProfile });
-  }, [isAuthenticated, userProfile]);
+    const handleResize = () => {
+      setIsXLScreen(window.innerWidth >= 1200);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogin = () => {
     KeycloakService.login();
@@ -83,39 +90,55 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
     },
   ];
 
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const modifierKey = isMac ? '⌘' : 'Ctrl';
+
   return (
     <AntHeader style={{ 
       padding: '0 24px', 
       background: isDarkMode ? '#141414' : '#fff',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'flex-end',
+      justifyContent: 'space-between',
       gap: '16px'
     }}>
-      <Switch
-        checkedChildren={<BulbOutlined />}
-        unCheckedChildren={<BulbFilled />}
-        checked={isDarkMode}
-        onChange={setDarkMode}
-      />
+      <Space>
+        {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+          onClick: () => setCollapsed(!collapsed),
+          style: { position: 'relative', top: '1.5px', fontSize: '16px', cursor: 'pointer' }
+        })}
+        {isXLScreen && (
+          <Tag color="cyan" style={{ margin: 0 }}>
+            {modifierKey} + B
+          </Tag>
+        )}
+      </Space>
+      <Space>
+        <Switch
+          checkedChildren={<BulbOutlined />}
+          unCheckedChildren={<BulbFilled />}
+          checked={isDarkMode}
+          onChange={setDarkMode}
+        />
 
-      {isAuthenticated ? (
-        <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
-          <Space style={{ cursor: 'pointer' }}>
-            <Avatar 
-              style={{ backgroundColor: '#1890ff' }}
-              size="large"
-              src={userProfile?.avatarUrl}
-              icon={!userProfile?.avatarUrl && <UserOutlined />}
-            />
+        {isAuthenticated ? (
+          <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
+            <Space style={{ cursor: 'pointer' }}>
+              <Avatar 
+                style={{ backgroundColor: '#1890ff' }}
+                size="large"
+                src={userProfile?.avatarUrl}
+                icon={!userProfile?.avatarUrl && <UserOutlined />}
+              />
+            </Space>
+          </Dropdown>
+        ) : (
+          <Space style={{ cursor: 'pointer' }} onClick={handleLogin}>
+            <LoginOutlined />
+            <Text>Login</Text>
           </Space>
-        </Dropdown>
-      ) : (
-        <Space style={{ cursor: 'pointer' }} onClick={handleLogin}>
-          <LoginOutlined />
-          <Text>Login</Text>
-        </Space>
-      )}
+        )}
+      </Space>
     </AntHeader>
   );
 };

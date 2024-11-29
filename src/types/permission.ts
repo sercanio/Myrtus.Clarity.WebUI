@@ -1,14 +1,14 @@
-export interface Role {
+export interface Permission {
   id: string;
+  feature: string;
   name: string;
 }
 
-export interface User {
+export interface Role {
   id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  roles: Role[];
+  name: string;
+  isDefault: boolean;
+  permissions?: Permission[];
 }
 
 export interface PaginatedResponse<T> {

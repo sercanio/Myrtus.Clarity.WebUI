@@ -1,10 +1,16 @@
-function Roles() {
+import RolesManagement from '../features/roles/components/RolesManagement';
+import { Grid } from 'antd';
+
+const { useBreakpoint } = Grid;
+
+const Roles = () => {
+  const screens = useBreakpoint();
+
   return (
-    <div>
-      <h1>Roles Management</h1>
-      {/* Add your roles management content here */}
+    <div style={{ padding: screens.xs ? '8px' : '16px' }}>
+      <RolesManagement />
     </div>
   );
-}
+};
 
-export default Roles; 
+export default Roles;

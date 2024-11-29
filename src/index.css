@@ -1,10 +1,34 @@
-html, body, #root {
-  height: 100%;
-  overflow: hidden;
-}
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
+
+html, body, #root {
+  height: 100%;
+}
+
+/* style scrollbars*/
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #d1d1d2;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888892;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.break-word {
+  word-wrap: break-word;
+}
+

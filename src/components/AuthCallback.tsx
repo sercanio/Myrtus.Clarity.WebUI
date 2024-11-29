@@ -3,6 +3,7 @@ import { useAppDispatch } from '../store/hooks';
 import { useNavigate } from 'react-router-dom';
 import { KeycloakService } from '../services/keycloak';
 import { setAuthTokens, fetchUserProfile } from '../store/slices/authSlice';
+import { message } from 'antd';
 
 export const AuthCallback = () => {
   const dispatch = useAppDispatch();
@@ -15,9 +16,6 @@ export const AuthCallback = () => {
         try {
           const tokens = await KeycloakService.handleCallback(code);
           
-          localStorage.setItem('access_token', tokens.access_token);
-          localStorage.setItem('refresh_token', tokens.refresh_token);
-          
           await dispatch(setAuthTokens({
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token,
@@ -27,7 +25,7 @@ export const AuthCallback = () => {
 
           navigate('/');
         } catch (error) {
-          console.error('Authentication failed:', error);
+          message.error('Authentication failed');
           navigate('/login');
         }
       }
