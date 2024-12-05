@@ -11,8 +11,8 @@ interface UserInfo {
 
 export class ApiService {
   static async fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const accessToken = localStorage.getItem('access_token');
-    
+    const accessToken = localStorage.getItem('id_token'); // Correct key
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers: {
@@ -32,4 +32,4 @@ export class ApiService {
   static async getCurrentUser(): Promise<UserInfo> {
     return this.fetchWithAuth<UserInfo>('/accounts/me');
   }
-} 
+}

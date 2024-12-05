@@ -13,7 +13,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined
 } from '@ant-design/icons';
-import { KeycloakService } from '../services/keycloak';
+import { AzureADB2CService } from '../services/azureAdB2CService';
 import { logout } from '../store/slices/authSlice';
 import type { RootState } from '../store';
 
@@ -42,11 +42,11 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   }, []);
 
   const handleLogin = () => {
-    KeycloakService.login();
+    AzureADB2CService.login();
   };
 
   const handleLogout = async () => {
-    await KeycloakService.logout(localStorage.getItem('refresh_token') || '');
+    await AzureADB2CService.logout(localStorage.getItem('refresh_token') || '');
     dispatch(logout());
     navigate('/');
   };

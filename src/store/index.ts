@@ -16,5 +16,7 @@ export const store = configureStore({
 
 setupListeners(store.dispatch);
 
+// Ensure any middleware related to Keycloak is removed and Azure AD B2C is integrated.
+
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch; 
+export type AppDispatch = typeof store.dispatch;
