@@ -27,3 +27,6 @@ Myrtus Clarity WebUI is a React-based web application designed for managing user
    ```bash
    git clone https://github.com/yourusername/myrtus-clarity-webui.git
    cd myrtus-clarity-webui
+![Ekran görüntüsü 2024-12-09 135514](https://github.com/user-attachments/assets/5f52d007-634a-4cc8-bc6b-e4d137bc28f7)
+![Ekran görüntüsü 2024-12-09 135531](https://github.com/user-attachments/assets/bdb61b1b-5c56-48ec-9112-6862a60f46ee)
+![Ekran görüntüsü 2024-12-09 135601](https://github.com/user-attachments/assets/f887c633-d520-4655-a4a4-9020a6500917)
