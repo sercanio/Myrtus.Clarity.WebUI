@@ -6,6 +6,7 @@ import './index.css';
 import App from './App.tsx';
 import 'antd/dist/reset.css';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { AuthCallback } from './components/AuthCallback';
 
 const connection = new HubConnectionBuilder()
   .withUrl('/auditLogHub')

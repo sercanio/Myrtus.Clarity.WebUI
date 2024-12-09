@@ -17,6 +17,7 @@ interface AuthState {
   userProfile: UserInfo | null;
   loading: boolean;
   error: string | null;
+  idToken: string | null;
 }
 
 const initialState: AuthState = {
@@ -28,6 +29,7 @@ const initialState: AuthState = {
     : null,
   loading: false,
   error: null,
+  idToken: localStorage.getItem('id_token'),
 };
 
 export const fetchUserProfile = createAsyncThunk(
@@ -46,12 +48,18 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAuthTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) => {
+    setAzureAuthTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string; idToken: string }>) => {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
-      state.isAuthenticated = true;
-      localStorage.setItem('access_token', action.payload.accessToken);
-      localStorage.setItem('refresh_token', action.payload.refreshToken);
+      state.idToken = action.payload.idToken;
+      state.isAuthenticated = !!action.payload.idToken;
+      localStorage.setItem('id_token', action.payload.idToken);
+      if (action.payload.accessToken) {
+        localStorage.setItem('access_token', action.payload.accessToken);
+      }
+      if (action.payload.refreshToken) {
+        localStorage.setItem('refresh_token', action.payload.refreshToken);
+      }
     },
     logout: (state) => {
       state.isAuthenticated = false;
@@ -59,9 +67,11 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.userProfile = null;
       state.error = null;
+      state.idToken = null;
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user_profile');
+      localStorage.removeItem('id_token');
     },
   },
   extraReducers: (builder) => {
@@ -82,5 +92,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuthTokens, logout } = authSlice.actions;
-export default authSlice.reducer; 
+export const { setAuthTokens, setAzureAuthTokens, logout } = authSlice.actions;
+export default authSlice.reducer;
