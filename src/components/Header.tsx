@@ -100,14 +100,14 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '16px'
+      gap: '2rem',
     }}>
       <Space>
-        {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+        {isAuthenticated && React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
           onClick: () => setCollapsed(!collapsed),
           style: { position: 'relative', top: '1.5px', fontSize: '16px', cursor: 'pointer' }
         })}
-        {isXLScreen && (
+        {isAuthenticated && isXLScreen && (
           <Tag color="cyan" style={{ margin: 0 }}>
             {modifierKey} + B
           </Tag>

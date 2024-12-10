@@ -7,11 +7,9 @@ import { AuthCallback } from '../components/AuthCallback';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
-import AuditLog from '../pages/AuditLog';
-import ActivityMonitor from '../pages/ActivityMonitor';
 import AuditLogs from '../pages/AuditLogs';
+import Home from '../pages/Home';
 
-// Define role constants
 const ROLES = {
   ADMIN: 'Admin',
   REGISTERED: 'Registered'
@@ -28,7 +26,7 @@ function AppRoutes() {
           isAuthenticated ? (
             <Navigate to="/users" replace />
           ) : (
-            <Navigate to="/" replace />
+            <Home />
           )
         } 
       />

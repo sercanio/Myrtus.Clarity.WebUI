@@ -9,6 +9,8 @@ import {
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store';
 
 const { Sider } = Layout;
 const { useBreakpoint } = Grid;
@@ -19,10 +21,15 @@ interface SidebarProps {
 }
 
 function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
   const screens = useBreakpoint();
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const items: MenuProps['items'] = [
     {
@@ -74,7 +81,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
       document.removeEventListener('touchstart', handleTouchOutside);
       document.removeEventListener('mousedown', handleTouchOutside);
     };
-  }, [collapsed, screens.lg, screens.xxl, setCollapsed]);
+  }, [collapsed, screens.lg, screens.xl, screens.xxl, setCollapsed]);
 
   return (
     <Sider

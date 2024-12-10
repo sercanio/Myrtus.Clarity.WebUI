@@ -42,6 +42,7 @@ export class AzureADB2CService {
         });
     
         window.location.href = `${loginUrl}?${params.toString()}`;
+        // Add navigation after login if needed
     }
     
     static async handleCallback(code: string) {
@@ -74,6 +75,7 @@ export class AzureADB2CService {
             throw new Error(`Token exchange failed: ${errorResponse.error_description || 'Unknown error'}`);
         }
     
+        window.location.href = '/';
         return response.json();
     }
 
@@ -127,5 +129,6 @@ export class AzureADB2CService {
             console.error('Logout error:', error);
             throw error;
         }
+        window.location.href = '/';
     }
 }

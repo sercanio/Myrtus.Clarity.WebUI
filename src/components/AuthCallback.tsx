@@ -33,11 +33,11 @@ export const AuthCallback = () => {
           navigate('/');
         } catch (error) {
           message.error('Authentication failed');
-          navigate('/login');
+          navigate('/');
         }
       } else {
         message.error('Invalid authentication response');
-        navigate('/login');
+        navigate('/');
       }
     };
 
