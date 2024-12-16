@@ -11,6 +11,8 @@ import {
   useDeleteRoleMutation,
   useUpdateRoleNameMutation
 } from '../../../store/services/roleApi';
+import { Role } from '../../../types/role';
+import { Permission } from '../../../types/permission';
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
@@ -56,7 +58,7 @@ const RolesManagement = () => {
   const groupedPermissions = useMemo(() => {
     if (!permissionsData?.items) return {};
 
-    return permissionsData.items.reduce((acc, permission) => {
+    return permissionsData.items.reduce((acc: { [x: string]: Permission[]; }, permission: Permission) => {
       if (!acc[permission.feature]) {
         acc[permission.feature] = [];
       }
@@ -159,7 +161,7 @@ const RolesManagement = () => {
             <List
               dataSource={rolesData?.items}
               style={{ maxHeight: '500px', overflow: 'auto' }}
-              renderItem={(role) => (
+              renderItem={(role: Role) => (
                 <List.Item
                   onClick={() => setSelectedRoleId(role.id)}
                   style={{
@@ -223,7 +225,7 @@ const RolesManagement = () => {
                   title={<Text strong style={{ textTransform: 'capitalize' }}>{feature}</Text>}
                 >
                   <Space direction="vertical">
-                    {permissions.map((permission) => (
+                    {(permissions as Permission[]).map((permission: Permission) => (
                       <Checkbox
                         key={permission.id}
                         checked={roleDetails?.permissions?.some(p => p.id === permission.id)}

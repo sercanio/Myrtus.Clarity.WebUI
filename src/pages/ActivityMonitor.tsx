@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Select, message, Grid, Card } from 'antd';
-import Title from 'antd/es/typography/Title';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import type { ColumnsType } from 'antd/es/table';
 import FormattedDate from '../components/FormattedDate';
@@ -109,9 +108,9 @@ const ActivityMonitor: React.FC = () => {
                     <Option value={50}>50 logs</Option>
                     <Option value={100}>100 logs</Option>
                 </Select>
-                <div style={{ overflowX: 'auto' }}>
+                {/* <div style={{ overflowX: 'auto' }}> */}
                     <Table columns={columns} dataSource={logs} pagination={false} rowKey="Id" />
-                </div>
+                {/* </div> */}
             </div>
         </Card>
     );

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Tag, Typography } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Flex } from 'antd';
 import type { MenuProps } from 'antd';
-import { 
-  UserOutlined, 
-  SettingOutlined, 
+import {
+  UserOutlined,
+  SettingOutlined,
   LogoutOutlined,
   LoginOutlined,
   BulbOutlined,
@@ -16,9 +16,7 @@ import {
 import { AzureADB2CService } from '../services/azureAdB2CService';
 import { logout } from '../store/slices/authSlice';
 import type { RootState } from '../store';
-
 const { Header: AntHeader } = Layout;
-const { Text } = Typography;
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -56,9 +54,11 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       key: 'user-info',
       label: (
         <div style={{ padding: '4px 0' }}>
-          <Text strong>{userProfile?.firstName} {userProfile?.lastName}</Text>
+          <Typography.Text strong>
+            {userProfile?.firstName} {userProfile?.lastName}
+          </Typography.Text>
           <br />
-          <Text type="secondary" style={{ fontSize: '12px' }}>{userProfile?.email}</Text>
+          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>{userProfile?.email}</Typography.Text>
         </div>
       ),
       disabled: true,
@@ -94,8 +94,8 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const modifierKey = isMac ? '⌘' : 'Ctrl';
 
   return (
-    <AntHeader style={{ 
-      padding: '0 24px', 
+    <AntHeader style={{
+      padding: '0 24px',
       background: isDarkMode ? '#141414' : '#fff',
       display: 'flex',
       alignItems: 'center',
@@ -108,12 +108,12 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
           style: { position: 'relative', top: '1.5px', fontSize: '16px', cursor: 'pointer' }
         })}
         {isXLScreen && (
-          <Tag color="cyan" style={{ margin: 0 }}>
+          <Tag color="cyan">
             {modifierKey} + B
           </Tag>
         )}
       </Space>
-      <Space>
+      <Flex gap="middle" align='center'>
         <Switch
           checkedChildren={<BulbOutlined />}
           unCheckedChildren={<BulbFilled />}
@@ -124,7 +124,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
         {isAuthenticated ? (
           <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
             <Space style={{ cursor: 'pointer' }}>
-              <Avatar 
+              <Avatar
                 style={{ backgroundColor: '#1890ff' }}
                 size="large"
                 src={userProfile?.avatarUrl}
@@ -133,12 +133,11 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             </Space>
           </Dropdown>
         ) : (
-          <Space style={{ cursor: 'pointer' }} onClick={handleLogin}>
-            <LoginOutlined />
-            <Text>Login</Text>
-          </Space>
+          <Button type="primary" icon={<LoginOutlined />} onClick={handleLogin}>
+            Login
+          </Button>
         )}
-      </Space>
+      </Flex>
     </AntHeader>
   );
 };

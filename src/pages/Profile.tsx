@@ -1,8 +1,9 @@
 import { Card, theme } from 'antd';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
+import React from 'react';
 
-function Profile() {
+const Profile: React.FC = () => {
   const { userProfile } = useSelector((state: RootState) => state.auth);
   const { token } = theme.useToken(); // Add this line
 

@@ -4,13 +4,14 @@ import type { ColumnsType, TableProps } from 'antd/es/table';
 import debounce from 'lodash/debounce';
 import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery, useGetUsersByRoleQuery } from '../../../store/services/userApi';
 import { useGetRolesQuery } from '../../../store/services/roleApi';
-import type { Role, User } from '../../../types/user';
 import { useRegisterMutation } from '../../../store/services/accountApi';
 import { RegisterUser } from '../../../types/registerUser';
 import { UserSearchFilters } from './UserSearchFilters';
 import { EditUserModal } from './EditUserModal';
 import { RegisterUserModal } from './RegisterUserModal';
 import type { ErrorResponse } from '../../../types/errorResponse';
+import type { User } from '../../../types/user';
+import type { Role } from '../../../types/role';
 
 const UsersTable = () => {
     const [pageIndex, setPageIndex] = useState(0);

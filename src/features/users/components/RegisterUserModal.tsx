@@ -1,5 +1,5 @@
 import { Modal, Form, Input, Button } from 'antd';
-import { RegisterUser } from '../../../types/registerUser';
+import type { RegisterUser } from '../../../types/registerUser';
 
 interface RegisterUserModalProps {
     visible: boolean;
