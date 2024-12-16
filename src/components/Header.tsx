@@ -97,46 +97,55 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
     <AntHeader style={{
       padding: '0 24px',
       background: isDarkMode ? '#141414' : '#fff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '16px'
     }}>
-      <Space>
-        {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-          onClick: () => setCollapsed(!collapsed),
-          style: { position: 'relative', top: '1.5px', fontSize: '16px', cursor: 'pointer' }
-        })}
-        {isXLScreen && (
-          <Tag color="cyan">
-            {modifierKey} + B
-          </Tag>
-        )}
-      </Space>
-      <Flex gap="middle" align='center'>
-        <Switch
-          checkedChildren={<BulbOutlined />}
-          unCheckedChildren={<BulbFilled />}
-          checked={isDarkMode}
-          onChange={setDarkMode}
-        />
+      <Flex
+        gap="middle"
+        align="center"
+        justify="space-between">
+        <Space>
+          {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+            onClick: () => setCollapsed(!collapsed),
+            style: { position: 'relative', top: '1.5px', fontSize: '16px', cursor: 'pointer' }
+          })}
+          {isXLScreen && (
+            <Tag color="cyan">
+              {modifierKey} + B
+            </Tag>
+          )}
+        </Space>
+        <Flex gap="middle" align='center'>
+          <Switch
+            checkedChildren={<BulbOutlined />}
+            unCheckedChildren={<BulbFilled />}
+            checked={isDarkMode}
+            onChange={setDarkMode}
+          />
 
-        {isAuthenticated ? (
-          <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
-            <Space style={{ cursor: 'pointer' }}>
+          {isAuthenticated ? (
+            <Dropdown
+              menu={{ items: userMenuItems }}
+              trigger={['hover']}
+              placement="bottomLeft"
+            >
               <Avatar
-                style={{ backgroundColor: '#1890ff' }}
                 size="large"
                 src={userProfile?.avatarUrl}
                 icon={!userProfile?.avatarUrl && <UserOutlined />}
+                style={{
+                  backgroundColor: '#1890ff',
+                  cursor: 'pointer'
+                }}
               />
-            </Space>
-          </Dropdown>
-        ) : (
-          <Button type="primary" icon={<LoginOutlined />} onClick={handleLogin}>
-            Login
-          </Button>
-        )}
+            </Dropdown>
+          ) : (
+            <Button
+              type="primary"
+              icon={<LoginOutlined />}
+              onClick={handleLogin}>
+              Login
+            </Button>
+          )}
+        </Flex>
       </Flex>
     </AntHeader>
   );
