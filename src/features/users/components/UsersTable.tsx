@@ -1,8 +1,27 @@
-import { useState, useMemo } from 'react';
-import { Table, Card, Button, Tag, message, Space, Form, Pagination, Grid, Select } from 'antd';
+import { useState, useMemo, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '../../../store/slices/uiSlice';
+import {
+    Table,
+    Card,
+    Button,
+    Tag,
+    message,
+    Space,
+    Form,
+    Pagination,
+    Grid,
+    Select
+} from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import debounce from 'lodash/debounce';
-import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery, useGetUsersByRoleQuery } from '../../../store/services/userApi';
+import {
+    useGetUsersQuery,
+    useGetUserDetailsQuery,
+    useUpdateUserRoleMutation,
+    useGetUsersDynamicQuery,
+    useGetUsersByRoleQuery
+} from '../../../store/services/userApi';
 import { useGetRolesQuery } from '../../../store/services/roleApi';
 import { useRegisterMutation } from '../../../store/services/accountApi';
 import { RegisterUser } from '../../../types/registerUser';
@@ -14,6 +33,7 @@ import type { User } from '../../../types/user';
 import type { Role } from '../../../types/role';
 
 const UsersTable = () => {
+    const dispatch = useDispatch();
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [registerUserModalVisible, setRegisterUserModalVisible] = useState(false);
@@ -78,6 +98,10 @@ const UsersTable = () => {
 
     const userData = selectedRoleId ? usersByRole : userDetailsDynamic;
     const isLoading = selectedRoleId ? isLoadingUsersByRole : isLoadingDynamic;
+
+    useEffect(() => {
+        dispatch(setLoading(isLoading));
+    }, [isLoading, dispatch]);
 
     const debouncedSearch = useMemo(
         () => debounce((value: string) => {
@@ -188,7 +212,7 @@ const UsersTable = () => {
             message.error(errorMessage);
         }
     };
-    
+
     const { useBreakpoint } = Grid;
     const screens = useBreakpoint();
 

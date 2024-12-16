@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react';
-import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm, Grid, Collapse, Tag } from 'antd';
+import { useState, useMemo, useEffect } from 'react';
+import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm, Grid, Collapse, Tag, Spin } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '../../../store/slices/uiSlice';
 import {
   useGetRolesQuery,
   useGetPermissionsQuery,
@@ -24,6 +26,7 @@ const formatPermissionName = (permissionName: string): string => {
 };
 
 const RolesManagement = () => {
+  const dispatch = useDispatch();
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const { token } = theme.useToken();
   const { useBreakpoint } = Grid;
@@ -34,14 +37,18 @@ const RolesManagement = () => {
     pageSize: 10
   });
 
-  const { data: permissionsData } = useGetPermissionsQuery({
+  const { data: permissionsData, isLoading: isLoadingPermissions } = useGetPermissionsQuery({
     pageIndex: 0,
     pageSize: 100
   });
 
-  const { data: roleDetails } = useGetRoleDetailsQuery(selectedRoleId!, {
+  const { data: roleDetails, isLoading: isLoadingRoleDetails } = useGetRoleDetailsQuery(selectedRoleId!, {
     skip: !selectedRoleId
   });
+
+  useEffect(() => {
+    dispatch(setLoading(isLoadingRoles || isLoadingPermissions || isLoadingRoleDetails));
+  }, [isLoadingRoles, isLoadingPermissions, isLoadingRoleDetails, dispatch]);
 
   const [updatePermission] = useUpdateRolePermissionMutation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -158,59 +165,61 @@ const RolesManagement = () => {
               />
             }
           >
-            <List
-              dataSource={rolesData?.items}
-              style={{ maxHeight: '500px', overflow: 'auto' }}
-              renderItem={(role: Role) => (
-                <List.Item
-                  onClick={() => setSelectedRoleId(role.id)}
-                  style={{
-                    cursor: 'pointer',
-                    padding: '10px 0px 10px 12px',
-                    margin: '4px 0',
-                    borderRadius: token.borderRadius,
-                    background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
-                    transition: 'all 0.3s'
-                  }}
-                  actions={[
-                    <Space align="center" size={1}>
-                      <Button
-                        type="text"
-                        icon={<EditOutlined />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditRole(role);
-                        }}
-                      />
-                      {!role.isDefault && (
-                        <Popconfirm
-                          title="Delete Role"
-                          description="Are you sure you want to delete this role?"
-                          onConfirm={(e) => {
-                            e?.stopPropagation();
-                            handleDeleteRole(role.id);
+            <Spin spinning={isLoadingRoles}>
+              <List
+                dataSource={rolesData?.items}
+                style={{ maxHeight: '500px', overflow: 'auto' }}
+                renderItem={(role: Role) => (
+                  <List.Item
+                    onClick={() => setSelectedRoleId(role.id)}
+                    style={{
+                      cursor: 'pointer',
+                      padding: '10px 0px 10px 12px',
+                      margin: '4px 0',
+                      borderRadius: token.borderRadius,
+                      background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
+                      transition: 'all 0.3s'
+                    }}
+                    actions={[
+                      <Space align="center" size={1}>
+                        <Button
+                          type="text"
+                          icon={<EditOutlined />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditRole(role);
                           }}
-                          onCancel={(e) => e?.stopPropagation()}
-                        >
-                          <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={(e) => e.stopPropagation()}
-                            style={{ marginRight: '0px', paddingRight: '0px' }}
-                          />
-                        </Popconfirm>
-                      )}
+                        />
+                        {!role.isDefault && (
+                          <Popconfirm
+                            title="Delete Role"
+                            description="Are you sure you want to delete this role?"
+                            onConfirm={(e) => {
+                              e?.stopPropagation();
+                              handleDeleteRole(role.id);
+                            }}
+                            onCancel={(e) => e?.stopPropagation()}
+                          >
+                            <Button
+                              type="text"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ marginRight: '0px', paddingRight: '0px' }}
+                            />
+                          </Popconfirm>
+                        )}
+                      </Space>
+                    ]}
+                  >
+                    <Space align="center" size={1}>
+                      <Text strong>{role.name}</Text>
+                      {role.isDefault && <Tag color="blue" style={{ marginLeft: 4, fontSize: '75%' }}>Default</Tag>}
                     </Space>
-                  ]}
-                >
-                  <Space align="center" size={1}>
-                    <Text strong>{role.name}</Text>
-                    {role.isDefault && <Tag color="blue" style={{ marginLeft: 4, fontSize: '75%' }}>Default</Tag>}
-                  </Space>
-                </List.Item>
-              )}
-            />
+                  </List.Item>
+                )}
+              />
+            </Spin>
           </Panel>
         </Collapse>
       </Sider>
