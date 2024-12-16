@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) =
   const { isAuthenticated, userProfile } = useSelector((state: RootState) => state.auth);
 
   if (!isAuthenticated) {
-    return <Navigate to="/landing" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   if (requiredRoles.length > 0 && userProfile) {

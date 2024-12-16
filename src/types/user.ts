@@ -1,7 +1,4 @@
-export interface Role {
-  id: string;
-  name: string;
-}
+import { Role } from "./role";
 
 export interface User {
   id: string;
@@ -10,13 +7,3 @@ export interface User {
   lastName: string;
   roles: Role[];
 }
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  pageIndex: number;
-  pageSize: number;
-  totalPages: number;
-  totalCount: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-} 

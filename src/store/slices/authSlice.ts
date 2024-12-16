@@ -92,5 +92,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuthTokens, setAzureAuthTokens, logout } = authSlice.actions;
+export const { setAzureAuthTokens, logout } = authSlice.actions;
 export default authSlice.reducer;

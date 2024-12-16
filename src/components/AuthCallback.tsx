@@ -24,7 +24,7 @@ export const AuthCallback = () => {
             idToken: tokens.id_token,
           }));
 
-          localStorage.setItem('access_token', tokens.access_token);
+          // localStorage.setItem('access_token', tokens.access_token);
           localStorage.setItem('refresh_token', tokens.refresh_token);
           localStorage.setItem('id_token', tokens.id_token);
 

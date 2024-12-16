@@ -1,26 +1,7 @@
 import { api } from '../api';
-import type { User, PaginatedResponse } from '../../types/user';
-
-interface SortDescriptor {
-  field: string;
-  dir: string;
-}
-
-interface FilterDescriptor {
-  field?: string;
-  operator?: string;
-  value?: string;
-  logic?: string;
-  filters?: FilterDescriptor[];
-  isCaseSensitive?: boolean;
-}
-
-interface DynamicQuery {
-  sort?: SortDescriptor[];
-  filter?: FilterDescriptor;
-  pageIndex: number;
-  pageSize: number;
-}
+import type { User } from '../../types/user';
+import type { PaginatedResponse } from '../../types/PaginatedResponse';
+import type { DynamicQuery } from '../../types/dynamicQuery';
 
 export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
