@@ -10,6 +10,8 @@ import type { RootState } from '../store';
 import AuditLog from '../pages/AuditLog';
 import ActivityMonitor from '../pages/ActivityMonitor';
 import AuditLogs from '../pages/AuditLogs';
+import Home from '../pages/Home';
+import Landing from '../pages/Landing';
 
 // Define role constants
 const ROLES = {
@@ -26,9 +28,9 @@ function AppRoutes() {
         path="/" 
         element={
           isAuthenticated ? (
-            <Navigate to="/users" replace />
+            <Home />
           ) : (
-            <Navigate to="/" replace />
+            <Landing />
           )
         } 
       />
