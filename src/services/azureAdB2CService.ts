@@ -57,7 +57,7 @@ export class AzureADB2CService {
             client_id: AZURE_AD_B2C_CONFIG.clientId,
             code: code,
             redirect_uri: AZURE_AD_B2C_CONFIG.redirectUri,
-            code_verifier: codeVerifier, // Pass the correct code verifier
+            code_verifier: codeVerifier,
         });
     
         const response = await fetch(tokenEndpoint, {

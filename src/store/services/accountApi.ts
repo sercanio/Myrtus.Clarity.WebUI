@@ -9,8 +9,9 @@ export const accountApi = api.injectEndpoints({
         method: 'POST',
         body: user,
       }),
+      invalidatesTags: ['Users'], // Invalidate 'Users' to refresh the users list
     }),
   }),
 });
 
-export const { useRegisterMutation } = accountApi; 
+export const { useRegisterMutation } = accountApi;

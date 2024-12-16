@@ -1,6 +1,7 @@
 import { api } from '../api';
 import type { PaginatedResponse } from '../../types/paginatedResponse';
-import type { AuditLog, DynamicQuery } from '../../types/auditLog';
+import type { AuditLog } from '../../types/auditLog';
+import type { DynamicQuery } from '../../types/dynamicQuery';
 
 export const auditLogApi = api.injectEndpoints({
   endpoints: (builder) => ({

@@ -21,7 +21,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  isAuthenticated: !!localStorage.getItem('access_token'),
+  isAuthenticated: !!localStorage.getItem('id_token'),
   accessToken: localStorage.getItem('access_token'),
   refreshToken: localStorage.getItem('refresh_token'),
   userProfile: localStorage.getItem('user_profile') 
@@ -48,7 +48,10 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAzureAuthTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string; idToken: string }>) => {
+    setAzureAuthTokens: (
+      state, 
+      action: PayloadAction<{ accessToken: string; refreshToken: string; idToken: string }>
+    ) => {
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.idToken = action.payload.idToken;
