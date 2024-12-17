@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs } from 'antd';
 import ActivityMonitor from './ActivityMonitor';
-import AuditLogsList from '../features/auditLogs/components/AuditLogsList';
+import AuditLogsList from '@features/auditLogs/components/AuditLogsList';
 
 const { TabPane } = Tabs;
 

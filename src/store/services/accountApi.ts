@@ -1,5 +1,5 @@
-import { api } from '../api';
-import type { RegisterUser } from '../../types/registerUser';
+import { api } from '@store/api';
+import type { RegisterUser } from '@types/registerUser';
 
 export const accountApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -9,7 +9,7 @@ export const accountApi = api.injectEndpoints({
         method: 'POST',
         body: user,
       }),
-      invalidatesTags: ['Users'], // Invalidate 'Users' to refresh the users list
+      invalidatesTags: ['Users'],
     }),
   }),
 });

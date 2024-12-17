@@ -83,12 +83,13 @@ const AuditLogsList: React.FC = () => {
                 padding: screens.xs ? '4px 6px' : '4px',
             }}
         >
-            <Space
-                size="large"
-                direction={screens.xs ? 'vertical' : 'horizontal'}
-                style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: 16 }}
-            ></Space>
-            <Input.Group compact style={{ display: 'flex', flexDirection: screens.xs ? 'column' : 'row', margin: '16px 0 32px 0' }}>
+            <Input.Group
+                compact
+                style={{
+                    display: 'flex',
+                    flexDirection: screens.xs ? 'column' : 'row',
+                    margin: '16px 0 32px 0'
+                }}>
                 <Select
                     defaultValue="action"
                     style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
@@ -121,7 +122,15 @@ const AuditLogsList: React.FC = () => {
                     setPageIndex(page - 1);
                     setPageSize(newPageSize);
                 }}
+                showSizeChanger
+                showTotal={total => `${total} Logs in total`}
                 responsive
+                style={{ 
+                    marginTop: 16,
+                    textAlign: 'right',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                }}
             />
         </Card>
     );

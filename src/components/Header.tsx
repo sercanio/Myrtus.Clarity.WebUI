@@ -13,9 +13,9 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined
 } from '@ant-design/icons';
-import { AzureADB2CService } from '../services/azureAdB2CService';
-import { logout } from '../store/slices/authSlice';
-import type { RootState } from '../store';
+import { AzureADB2CService } from '@services/azureAdB2CService';
+import { logout } from '@store/slices/authSlice';
+import type { RootState } from '@store/index';
 const { Header: AntHeader } = Layout;
 
 interface HeaderProps {

@@ -1,4 +1,4 @@
-import { base64UrlEncode, sha256 } from '../utils/pkce';
+import { base64UrlEncode, sha256 } from '@utils/pkce';
 
 const AZURE_AD_B2C_CONFIG = {
     tenant: import.meta.env.VITE_AZURE_AD_B2C_TENANT,

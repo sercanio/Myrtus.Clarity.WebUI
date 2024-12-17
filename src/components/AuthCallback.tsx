@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { useAppDispatch } from '../store/hooks';
 import { useNavigate } from 'react-router-dom';
-import { AzureADB2CService } from '../services/azureAdB2CService';
-import { setAzureAuthTokens, fetchUserProfile } from '../store/slices/authSlice';
+import { useAppDispatch } from '@store/hooks';
+import { AzureADB2CService } from '@services/azureAdB2CService';
+import { setAzureAuthTokens, fetchUserProfile } from '@store/slices/authSlice';
 import { message } from 'antd';
 
 export const AuthCallback = () => {

@@ -1,4 +1,4 @@
-import RolesManagement from '../features/roles/components/RolesManagement';
+import RolesManagement from '@features/roles/components/RolesManagement';
 
 const Roles: React.FC = () => <RolesManagement />
 

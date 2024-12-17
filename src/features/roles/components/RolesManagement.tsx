@@ -13,7 +13,7 @@ import {
   useDeleteRoleMutation,
   useUpdateRoleNameMutation
 } from '../../../store/services/roleApi';
-import { Role } from '../../../types/role';
+import { Role } from '@types/role';
 import { Permission } from '../../../types/permission';
 
 const { Sider, Content } = Layout;

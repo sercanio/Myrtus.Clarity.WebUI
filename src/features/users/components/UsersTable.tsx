@@ -258,30 +258,24 @@ const UsersTable = () => {
                         overflowX: 'auto',
                     }}
                 />
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: 16 }}>
-                    <Pagination
-                        current={pageIndex + 1}
-                        pageSize={pageSize}
-                        total={userData?.totalCount}
-                        onChange={(page, newPageSize) => {
-                            setPageIndex(page - 1);
-                            setPageSize(newPageSize);
-                        }}
-                        responsive
-                    />
-                    <Select
-                        value={pageSize}
-                        onChange={(value) => setPageSize(value)}
-                        style={{ width: 100, marginLeft: 16 }}
-                    >
-                        <Select.Option value={5}>5 / page</Select.Option>
-                        <Select.Option value={10}>10 / page</Select.Option>
-                        <Select.Option value={20}>20 / page</Select.Option>
-                        <Select.Option value={50}>50 / page</Select.Option>
-                        <Select.Option value={100}>100 / page</Select.Option>
-                    </Select>
-                </div>
+                <Pagination
+                    current={pageIndex + 1}
+                    pageSize={pageSize}
+                    total={userData?.totalCount}
+                    onChange={(page, newPageSize) => {
+                        setPageIndex(page - 1);
+                        setPageSize(newPageSize);
+                    }}
+                    responsive
+                    showSizeChanger
+                    showTotal={total => `${total} Users in total`}
+                    style={{
+                        marginTop: 16,
+                        textAlign: 'right',
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                    }}
+                />
             </Card>
             <EditUserModal
                 visible={editModalVisible}

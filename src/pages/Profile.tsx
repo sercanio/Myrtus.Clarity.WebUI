@@ -1,6 +1,6 @@
 import { Card, theme } from 'antd';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
+import type { RootState } from '@store/index';
 import React from 'react';
 
 const Profile: React.FC = () => {

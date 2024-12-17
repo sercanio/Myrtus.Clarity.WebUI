@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatDate } from '../utils/dateFormatter';
+import { formatDate } from '@utils/dateFormatter';
 import { Typography } from 'antd';
 
 interface FormattedDateProps {

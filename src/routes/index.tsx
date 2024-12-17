@@ -1,17 +1,15 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Users from '../pages/Users';
-import Roles from '../pages/Roles';
-import Settings from '../pages/Settings';
-import Profile from '../pages/Profile';
-import { AuthCallback } from '../components/AuthCallback';
-import ProtectedRoute from '../components/ProtectedRoute';
+import { Routes, Route } from 'react-router-dom';
+import Users from '@pages/Users';
+import Roles from '@pages/Roles';
+import Settings from '@pages/Settings';
+import Profile from '@pages/Profile';
+import { AuthCallback } from '@components/AuthCallback';
+import ProtectedRoute from '@components/ProtectedRoute';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
-import AuditLog from '../pages/AuditLog';
-import ActivityMonitor from '../pages/ActivityMonitor';
-import AuditLogs from '../pages/AuditLogs';
-import Home from '../pages/Home';
-import Landing from '../pages/Landing';
+import type { RootState } from '@store/index';
+import AuditLogs from '@pages/AuditLogs';
+import Home from '@pages/Home';
+import Landing from '@pages/Landing';
 
 // Define role constants
 const ROLES = {
