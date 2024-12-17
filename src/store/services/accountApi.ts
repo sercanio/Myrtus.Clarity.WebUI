@@ -11,7 +11,19 @@ export const accountApi = api.injectEndpoints({
       }),
       invalidatesTags: ['Users'],
     }),
+    updateNotificationPreferences: builder.mutation<void, {
+      inAppNotification: boolean;
+      emailNotification: boolean;
+      pushNotification: boolean;
+    }>({
+      query: (preferences) => ({
+        url: '/accounts/me/notifications',
+        method: 'PATCH',
+        body: preferences,
+      }),
+      invalidatesTags: ['Users'],
+    }),
   }),
 });
 
-export const { useRegisterMutation } = accountApi;
+export const { useRegisterMutation, useUpdateNotificationPreferencesMutation } = accountApi;

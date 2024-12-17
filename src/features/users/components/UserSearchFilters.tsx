@@ -1,6 +1,6 @@
 import { Input, Select, Space, Grid } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import type { Role } from '../../../types/role';
+import type { Role } from '@types/role';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;

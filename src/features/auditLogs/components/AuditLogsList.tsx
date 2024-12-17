@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Table, Card, Pagination, Select, Grid, Space, Input } from 'antd';
+import { Table, Card, Pagination, Select, Grid, Space, Input, Layout, Typography } from 'antd';
 import { useGetAuditLogsDynamicQuery } from '../../../store/services/auditLogApi';
 import debounce from 'lodash/debounce';
 import type { ColumnsType, TableProps } from 'antd/es/table';
@@ -9,6 +9,7 @@ import FormattedDate from '../../../components/FormattedDate';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
+const { Content } = Layout;
 
 const AuditLogsList: React.FC = () => {
     const [pageIndex, setPageIndex] = useState(0);
@@ -70,69 +71,73 @@ const AuditLogsList: React.FC = () => {
     const screens = useBreakpoint();
 
     return (
-        <Card
-            title="Audit Logs"
-            style={{
-                margin: screens.xs ? '2px 0px' : '2px 16px',
-                padding: screens.xs ? '4px 0px' : '4px',
-            }}
-            bodyStyle={{
-                padding: screens.xs ? '4px' : '16px',
-            }}
-            headStyle={{
-                padding: screens.xs ? '4px 6px' : '4px',
-            }}
-        >
-            <Input.Group
-                compact
-                style={{
-                    display: 'flex',
-                    flexDirection: screens.xs ? 'column' : 'row',
-                    margin: '16px 0 32px 0'
-                }}>
-                <Select
-                    defaultValue="action"
-                    style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
-                    onChange={setSearchField}
+        <Layout style={{ background: 'transparent', padding: 0 }}>
+            <Content style={{ padding: 0, width: '100%' }}>
+                <Card
+                    title="Audit Logs"
+                    style={{
+                        margin: screens.xs ? '2px 0px' : '2px 16px',
+                        padding: screens.xs ? '4px 0px' : '4px',
+                    }}
+                    bodyStyle={{
+                        padding: screens.xs ? '4px' : '16px',
+                    }}
+                    headStyle={{
+                        padding: screens.xs ? '4px 6px' : '4px',
+                    }}
                 >
-                    <Option value="user">User</Option>
-                    <Option value="action">Action</Option>
-                    <Option value="entity">Entity</Option>
-                </Select>
-                <Input
-                    placeholder="Search logs..."
-                    prefix={<SearchOutlined />}
-                    onChange={e => debouncedSearch(e.target.value)}
-                    style={{ width: screens.xs ? '100%' : 200 }} />
-            </Input.Group>
-            <Table<AuditLog>
-                columns={columns}
-                dataSource={auditLogs?.items}
-                loading={isLoading}
-                rowKey="id"
-                pagination={false}
-                onChange={handleTableChange}
-                style={{ width: '100%', overflowX: 'auto' }}
-            />
-            <Pagination
-                current={pageIndex + 1}
-                pageSize={pageSize}
-                total={auditLogs?.totalCount}
-                onChange={(page, newPageSize) => {
-                    setPageIndex(page - 1);
-                    setPageSize(newPageSize);
-                }}
-                showSizeChanger
-                showTotal={total => `${total} Logs in total`}
-                responsive
-                style={{ 
-                    marginTop: 16,
-                    textAlign: 'right',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                }}
-            />
-        </Card>
+                    <Input.Group
+                        compact
+                        style={{
+                            display: 'flex',
+                            flexDirection: screens.xs ? 'column' : 'row',
+                            margin: '16px 0 32px 0'
+                        }}>
+                        <Select
+                            defaultValue="action"
+                            style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
+                            onChange={setSearchField}
+                        >
+                            <Option value="user">User</Option>
+                            <Option value="action">Action</Option>
+                            <Option value="entity">Entity</Option>
+                        </Select>
+                        <Input
+                            placeholder="Search logs..."
+                            prefix={<SearchOutlined />}
+                            onChange={e => debouncedSearch(e.target.value)}
+                            style={{ width: screens.xs ? '100%' : 200 }} />
+                    </Input.Group>
+                    <Table<AuditLog>
+                        columns={columns}
+                        dataSource={auditLogs?.items}
+                        loading={isLoading}
+                        rowKey="id"
+                        pagination={false}
+                        onChange={handleTableChange}
+                        style={{ width: '100%', overflowX: 'auto' }}
+                    />
+                    <Pagination
+                        current={pageIndex + 1}
+                        pageSize={pageSize}
+                        total={auditLogs?.totalCount}
+                        onChange={(page, newPageSize) => {
+                            setPageIndex(page - 1);
+                            setPageSize(newPageSize);
+                        }}
+                        showSizeChanger
+                        showTotal={total => `${total} Logs in total`}
+                        responsive
+                        style={{ 
+                            marginTop: 16,
+                            textAlign: 'right',
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                        }}
+                    />
+                </Card>
+            </Content>
+        </Layout>
     );
 };
 

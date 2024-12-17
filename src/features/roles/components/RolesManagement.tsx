@@ -148,149 +148,152 @@ const RolesManagement = () => {
   };
 
   return (
-    <Layout style={{ background: 'inherit', flexDirection: screens.md ? 'row' : 'column' }}>
-      <Sider width={screens.md ? 300 : '100%'} style={{ background: 'inherit', marginBottom: screens.md ? 0 : 16 }}>
-        <Collapse defaultActiveKey={['1']} style={{ background: 'inherit' }}>
-          <Panel
-            header={selectedRoleId ? `Selected Role: ${rolesData?.items.find(role => role.id === selectedRoleId)?.name}` : "Roles"}
-            key="1"
-            extra={
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCreateModalOpen(true);
-                }}
-              />
-            }
-          >
-            <Spin spinning={isLoadingRoles}>
-              <List
-                dataSource={rolesData?.items}
-                style={{ maxHeight: '500px', overflow: 'auto' }}
-                renderItem={(role: Role) => (
-                  <List.Item
-                    onClick={() => setSelectedRoleId(role.id)}
-                    style={{
-                      cursor: 'pointer',
-                      padding: '10px 0px 10px 12px',
-                      margin: '4px 0',
-                      borderRadius: token.borderRadius,
-                      background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
-                      transition: 'all 0.3s'
-                    }}
-                    actions={[
-                      <Space align="center" size={1}>
-                        <Button
-                          type="text"
-                          icon={<EditOutlined />}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditRole(role);
-                          }}
-                        />
-                        {!role.isDefault && (
-                          <Popconfirm
-                            title="Delete Role"
-                            description="Are you sure you want to delete this role?"
-                            onConfirm={(e) => {
-                              e?.stopPropagation();
-                              handleDeleteRole(role.id);
+    <>
+      <Typography.Title level={2}>Roles Management</Typography.Title>
+      <Layout style={{ background: 'inherit', flexDirection: screens.md ? 'row' : 'column' }}>
+        <Sider width={screens.md ? 300 : '100%'} style={{ background: 'inherit', marginBottom: screens.md ? 0 : 16 }}>
+          <Collapse defaultActiveKey={['1']} style={{ background: 'inherit' }}>
+            <Panel
+              header={selectedRoleId ? `Selected Role: ${rolesData?.items.find(role => role.id === selectedRoleId)?.name}` : "Roles"}
+              key="1"
+              extra={
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCreateModalOpen(true);
+                  }}
+                />
+              }
+            >
+              <Spin spinning={isLoadingRoles}>
+                <List
+                  dataSource={rolesData?.items}
+                  style={{ maxHeight: '500px', overflow: 'auto' }}
+                  renderItem={(role: Role) => (
+                    <List.Item
+                      onClick={() => setSelectedRoleId(role.id)}
+                      style={{
+                        cursor: 'pointer',
+                        padding: '10px 0px 10px 12px',
+                        margin: '4px 0',
+                        borderRadius: token.borderRadius,
+                        background: selectedRoleId === role.id ? token.colorBgTextHover : 'transparent',
+                        transition: 'all 0.3s'
+                      }}
+                      actions={[
+                        <Space align="center" size={1}>
+                          <Button
+                            type="text"
+                            icon={<EditOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditRole(role);
                             }}
-                            onCancel={(e) => e?.stopPropagation()}
-                          >
-                            <Button
-                              type="text"
-                              danger
-                              icon={<DeleteOutlined />}
-                              onClick={(e) => e.stopPropagation()}
-                              style={{ marginRight: '0px', paddingRight: '0px' }}
-                            />
-                          </Popconfirm>
-                        )}
+                          />
+                          {!role.isDefault && (
+                            <Popconfirm
+                              title="Delete Role"
+                              description="Are you sure you want to delete this role?"
+                              onConfirm={(e) => {
+                                e?.stopPropagation();
+                                handleDeleteRole(role.id);
+                              }}
+                              onCancel={(e) => e?.stopPropagation()}
+                            >
+                              <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ marginRight: '0px', paddingRight: '0px' }}
+                              />
+                            </Popconfirm>
+                          )}
+                        </Space>
+                      ]}
+                    >
+                      <Space align="center" size={1}>
+                        <Text strong>{role.name}</Text>
+                        {role.isDefault && <Tag color="blue" style={{ marginLeft: 4, fontSize: '75%' }}>Default</Tag>}
                       </Space>
-                    ]}
+                    </List.Item>
+                  )}
+                />
+              </Spin>
+            </Panel>
+          </Collapse>
+        </Sider>
+        <Content style={{ padding: screens.md ? '0 24px' : '0', width: '100%' }}>
+          {selectedRoleId ? (
+            <Card title={`Permissions for ${roleDetails?.name}`}>
+              <Space direction="vertical" style={{ maxHeight: '500px', overflow: 'auto', width: '100%' }}>
+                {Object.entries(groupedPermissions).map(([feature, permissions]) => (
+                  <Card
+                    key={feature}
+                    size="small"
+                    title={<Text strong style={{ textTransform: 'capitalize' }}>{feature}</Text>}
                   >
-                    <Space align="center" size={1}>
-                      <Text strong>{role.name}</Text>
-                      {role.isDefault && <Tag color="blue" style={{ marginLeft: 4, fontSize: '75%' }}>Default</Tag>}
+                    <Space direction="vertical">
+                      {(permissions as Permission[]).map((permission: Permission) => (
+                        <Checkbox
+                          key={permission.id}
+                          checked={roleDetails?.permissions?.some(p => p.id === permission.id)}
+                          onChange={(e: CheckboxChangeEvent) =>
+                            handlePermissionChange(permission.id, e.target.checked)
+                          }
+                        >
+                          {formatPermissionName(permission.name)}
+                        </Checkbox>
+                      ))}
                     </Space>
-                  </List.Item>
-                )}
-              />
-            </Spin>
-          </Panel>
-        </Collapse>
-      </Sider>
-      <Content style={{ padding: screens.md ? '0 24px' : '0', width: '100%' }}>
-        {selectedRoleId ? (
-          <Card title={`Permissions for ${roleDetails?.name}`}>
-            <Space direction="vertical" style={{ maxHeight: '500px', overflow: 'auto', width: '100%' }}>
-              {Object.entries(groupedPermissions).map(([feature, permissions]) => (
-                <Card
-                  key={feature}
-                  size="small"
-                  title={<Text strong style={{ textTransform: 'capitalize' }}>{feature}</Text>}
-                >
-                  <Space direction="vertical">
-                    {(permissions as Permission[]).map((permission: Permission) => (
-                      <Checkbox
-                        key={permission.id}
-                        checked={roleDetails?.permissions?.some(p => p.id === permission.id)}
-                        onChange={(e: CheckboxChangeEvent) =>
-                          handlePermissionChange(permission.id, e.target.checked)
-                        }
-                      >
-                        {formatPermissionName(permission.name)}
-                      </Checkbox>
-                    ))}
-                  </Space>
-                </Card>
-              ))}
-            </Space>
-          </Card>
-        ) : (
-          <Card>
-            <Text>Select a role to manage permissions</Text>
-          </Card>
-        )}
-      </Content>
+                  </Card>
+                ))}
+              </Space>
+            </Card>
+          ) : (
+            <Card>
+              <Text>Select a role to manage permissions</Text>
+            </Card>
+          )}
+        </Content>
 
-      <Modal
-        title="Create New Role"
-        open={isCreateModalOpen}
-        onOk={handleCreateRole}
-        onCancel={() => {
-          setIsCreateModalOpen(false);
-          setNewRoleName('');
-        }}
-        okButtonProps={{ disabled: !newRoleName.trim() }}
-      >
-        <Input
-          placeholder="Enter role name"
-          value={newRoleName}
-          onChange={(e) => setNewRoleName(e.target.value)}
-        />
-      </Modal>
+        <Modal
+          title="Create New Role"
+          open={isCreateModalOpen}
+          onOk={handleCreateRole}
+          onCancel={() => {
+            setIsCreateModalOpen(false);
+            setNewRoleName('');
+          }}
+          okButtonProps={{ disabled: !newRoleName.trim() }}
+        >
+          <Input
+            placeholder="Enter role name"
+            value={newRoleName}
+            onChange={(e) => setNewRoleName(e.target.value)}
+          />
+        </Modal>
 
-      <Modal
-        title="Edit Role Name"
-        open={isEditNameModalOpen}
-        onOk={handleUpdateRoleName}
-        onCancel={() => {
-          setIsEditNameModalOpen(false);
-          setEditingRole(null);
-        }}
-        okButtonProps={{ disabled: !editingRole?.name.trim() }}
-      >
-        <Input
-          placeholder="Enter new role name"
-          value={editingRole?.name || ''}
-          onChange={(e) => setEditingRole(prev => prev ? { ...prev, name: e.target.value } : null)}
-        />
-      </Modal>
-    </Layout>
+        <Modal
+          title="Edit Role Name"
+          open={isEditNameModalOpen}
+          onOk={handleUpdateRoleName}
+          onCancel={() => {
+            setIsEditNameModalOpen(false);
+            setEditingRole(null);
+          }}
+          okButtonProps={{ disabled: !editingRole?.name.trim() }}
+        >
+          <Input
+            placeholder="Enter new role name"
+            value={editingRole?.name || ''}
+            onChange={(e) => setEditingRole(prev => prev ? { ...prev, name: e.target.value } : null)}
+          />
+        </Modal>
+      </Layout>
+    </>
   );
 };
 

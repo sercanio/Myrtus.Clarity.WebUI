@@ -1,13 +1,21 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { ApiService } from '../../services/api';
+import { ApiService } from '@services/api';
 
 interface UserInfo {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  roles: string[];
+  roles: {
+    id: string;
+    name: string;
+  }[];
   avatarUrl?: string;
+  notificationPreference: {
+    isInAppNotificationEnabled: boolean;
+    isEmailNotificationEnabled: boolean;
+    isPushNotificationEnabled: boolean;
+  };
 }
 
 interface AuthState {

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Layout, Grid } from 'antd';
 import { BrowserRouter } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import Sidebar from '@components/Sidebar';
+import Header from '@components/Header';
+import Footer from '@components/Footer';
 import AppRoutes from './routes';
 import { ConfigProvider, theme } from 'antd';
-import useLocalStorage from './hooks/useLocalStorage';
+import useLocalStorage from '@hooks/useLocalStorage';
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;

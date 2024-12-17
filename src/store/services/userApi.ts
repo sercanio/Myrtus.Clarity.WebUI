@@ -1,7 +1,7 @@
-import { api } from '../api';
-import type { User } from '../../types/user';
-import type { PaginatedResponse } from '../../types/PaginatedResponse';
-import type { DynamicQuery } from '../../types/dynamicQuery';
+import { api } from '@store/api';
+import type { User } from '@types/user';
+import type { PaginatedResponse } from '@types/PaginatedResponse';
+import type { DynamicQuery } from '@types/dynamicQuery';
 
 export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({

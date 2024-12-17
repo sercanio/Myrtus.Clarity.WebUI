@@ -1,6 +1,6 @@
 import { Modal, Button, Checkbox } from 'antd';
-import type { User } from '../../../types/user';
-import type { Role } from '../../../types/role';
+import type { User } from '@types/user';
+import type { Role } from '@types/role';
 
 interface EditUserModalProps {
     visible: boolean;

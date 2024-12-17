@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { BaseQueryFn, FetchArgs } from '@reduxjs/toolkit/query';
-import { AzureADB2CService } from '../services/azureAdB2CService';
-import { setAzureAuthTokens, logout, fetchUserProfile } from './slices/authSlice';
+import { AzureADB2CService } from '@services/azureAdB2CService';
+import { setAzureAuthTokens, logout, fetchUserProfile } from '@store/slices/authSlice';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL,

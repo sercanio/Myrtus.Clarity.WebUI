@@ -7,6 +7,11 @@ interface UserInfo {
   lastName: string;
   roles: string[];
   avatarUrl?: string;
+  notificationPreference: {
+    isInAppNotificationEnabled: boolean;
+    isEmailNotificationEnabled: boolean;
+    isPushNotificationEnabled: boolean;
+  };
 }
 
 export class ApiService {

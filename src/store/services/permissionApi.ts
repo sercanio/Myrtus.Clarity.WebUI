@@ -1,6 +1,6 @@
-import { api } from '../api';
-import type { Role } from '../../types/role';
-import type { PaginatedResponse } from '../../types/user';
+import { api } from '@store/api';
+import type { Role } from '@types/role';
+import type { PaginatedResponse } from '@types/paginatedResponse';
 
 export const permissionApi = api.injectEndpoints({
   endpoints: (builder) => ({
