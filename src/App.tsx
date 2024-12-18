@@ -7,6 +7,10 @@ import Footer from '@components/Footer';
 import AppRoutes from './routes';
 import { ConfigProvider, theme } from 'antd';
 import useLocalStorage from '@hooks/useLocalStorage';
+import { useMsal } from '@azure/msal-react';
+import { useAppDispatch } from '@store/hooks';
+import { loginSuccess, logoutFailure } from '@store/slices/authSlice';
+import { acquireTokenSilent } from '@services/msalService';
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -15,6 +19,8 @@ function App() {
   const [collapsed, setCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('theme-preference', false);
   const screens = useBreakpoint();
+  const {  accounts } = useMsal();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -33,6 +39,41 @@ function App() {
       setCollapsed(true);
     }
   }, [screens]);
+
+  useEffect(() => {
+    const processAccount = async () => {
+      if (accounts.length > 0) {
+        const account = accounts[0];
+        try {
+          const tokenResponse = await acquireTokenSilent(account);
+          
+          if (tokenResponse?.accessToken) {
+            const plainTenantProfiles = account.tenantProfiles
+              ? Object.fromEntries(account.tenantProfiles)
+              : {};
+
+            dispatch(loginSuccess({
+              account: {
+                ...account,
+                tenantProfiles: plainTenantProfiles,
+              },
+              accessToken: tokenResponse.accessToken,
+            }));
+          } else {
+            console.error('Token acquired but no access token present');
+            dispatch(logoutFailure());
+          }
+        } catch (error) {
+          console.error('Token acquisition error:', error);
+          dispatch(logoutFailure());
+        }
+      } else {
+        dispatch(logoutFailure());
+      }
+    };
+
+    processAccount();
+  }, [accounts, dispatch]);
 
   return (
     <BrowserRouter>

@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { Notification } from '@types/notification';
-import { notification } from 'antd';
 
 interface UiState {
   isLoading: boolean;

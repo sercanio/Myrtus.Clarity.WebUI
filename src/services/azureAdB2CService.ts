@@ -1,12 +1,13 @@
 import { base64UrlEncode, sha256 } from '@utils/pkce';
 
-const AZURE_AD_B2C_CONFIG = {
+export const AZURE_AD_B2C_CONFIG = {
     tenant: import.meta.env.VITE_AZURE_AD_B2C_TENANT,
     domain: import.meta.env.VITE_AZURE_AD_B2C_DOMAIN,
     clientId: import.meta.env.VITE_AZURE_AD_B2C_CLIENT_ID,
     clientSecret: import.meta.env.VITE_AZURE_AD_B2C_CLIENT_SECRET,
     policySignUpSignIn: import.meta.env.VITE_AZURE_AD_B2C_POLICY_SIGNUP_SIGNIN,
     policyPasswordReset: import.meta.env.VITE_AZURE_AD_B2C_POLICY_PASSWORD_RESET,
+    authority: import.meta.env.VITE_AZURE_AD_B2C_AUTHORITY,
     redirectUri: import.meta.env.VITE_AZURE_AD_B2C_REDIRECT_URI,
 };
 

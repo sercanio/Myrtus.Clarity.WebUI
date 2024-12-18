@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Flex, Badge, Menu } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Badge, Menu, Flex } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   UserOutlined,
@@ -13,11 +13,14 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined
 } from '@ant-design/icons';
-import { AzureADB2CService } from '@services/azureAdB2CService';
-import { logout } from '@store/slices/authSlice';
+import { useMsal, useAccount } from '@azure/msal-react';
+import { login, logoutUser, msalInstance } from '@services/msalService';
+import { loginSuccess, logout } from '@store/slices/authSlice';
 import type { RootState } from '@store/index';
 import { useAppDispatch } from '@store/hooks';
 import NotificationBell from '@components/NotificationBell';
+import { useGetCurrentUserQuery } from '@store/services/accountApi' // Removed comma
+
 const { Header: AntHeader } = Layout;
 
 interface HeaderProps {
@@ -30,8 +33,13 @@ interface HeaderProps {
 const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, userProfile } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated} = useSelector((state: RootState) => state.auth);
+  const { instance, accounts } = useMsal();
+  const account = useAccount(accounts[0] || {});
   const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
+  const { data: userProfile } = useGetCurrentUserQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -41,12 +49,62 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleLogin = () => {
-    AzureADB2CService.login();
+  useEffect(() => {
+    const acquireAndStoreToken = async () => {
+      if (isAuthenticated && account) {
+        try {
+          await msalInstance.initialize()
+          const response = await instance.acquireTokenSilent({
+            scopes: import.meta.env.VITE_AZURE_AD_B2C_SCOPES.split(' '),
+            account: account,
+          });
+          const plainTenantProfiles = account.tenantProfiles
+            ? Object.fromEntries(account.tenantProfiles)
+            : {};
+
+          dispatch(loginSuccess({ 
+            account: { 
+              ...account, 
+              tenantProfiles: plainTenantProfiles 
+            }, 
+            accessToken: response.accessToken 
+          }));
+        } catch (error: any) {
+          console.error('Token acquisition error in Header.tsx:', error);
+          // Optionally handle token acquisition failure
+        }
+      }
+    };
+    acquireAndStoreToken();
+  }, [isAuthenticated, account, instance, dispatch]);
+
+  const handleLogin = async () => {
+    try {
+      const result = await login();
+      if (result?.account && result?.accessToken) {
+        const plainTenantProfiles = result.account.tenantProfiles
+          ? Object.fromEntries(result.account.tenantProfiles)
+          : {};
+
+        dispatch(loginSuccess({
+          account: {
+            ...result.account,
+            tenantProfiles: plainTenantProfiles,
+          },
+          accessToken: result.accessToken,
+        }));
+        navigate('/');
+      } else {
+        console.error('Login successful but no access token received');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Optionally show error message to user
+    }
   };
 
-  const handleLogout = async () => {
-    await AzureADB2CService.logout(localStorage.getItem('refresh_token') || '');
+  const handleLogout = () => {
+    logoutUser();
     dispatch(logout());
     navigate('/');
   };

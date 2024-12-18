@@ -1,33 +1,32 @@
 import { Card, theme } from 'antd';
-import { useSelector, useDispatch } from 'react-redux';
-import type { RootState } from '@store/index';
+import { useDispatch } from 'react-redux';
 import React, { useRef, useMemo } from 'react';
-import { useUpdateNotificationPreferencesMutation } from '@store/services/accountApi';
-import { Switch, Button, message } from 'antd';
+import { useGetCurrentUserQuery, useUpdateNotificationPreferencesMutation } from '@store/services/accountApi';
+import { Switch, Button, message, Spin } from 'antd';
 import { useState } from 'react';
-import { fetchUserProfile } from '@store/slices/authSlice';
 import { Layout, Row, Col, Descriptions, Form, Typography } from 'antd';
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 const Profile: React.FC = () => {
-  const { userProfile } = useSelector((state: RootState) => state.auth);
+  const { data: userProfile, isLoading, error } = useGetCurrentUserQuery();
   const { token } = theme.useToken();
   const dispatch = useDispatch();
 
   const [updatePreferences] = useUpdateNotificationPreferencesMutation();
 
   const [preferences, setPreferences] = useState({
-    inAppNotification: userProfile?.notificationPreference.isInAppNotificationEnabled || false,
-    emailNotification: userProfile?.notificationPreference.isEmailNotificationEnabled || false,
-    pushNotification: userProfile?.notificationPreference.isPushNotificationEnabled || false,
+    inAppNotification: false,
+    emailNotification: false,
+    pushNotification: false,
   });
 
   const initialPreferencesRef = useRef(preferences);
 
+  // Update preferences when userProfile is loaded
   React.useEffect(() => {
-    if (userProfile) {
+    if (userProfile?.notificationPreference) {
       const initialPrefs = {
         inAppNotification: userProfile.notificationPreference.isInAppNotificationEnabled,
         emailNotification: userProfile.notificationPreference.isEmailNotificationEnabled,
@@ -57,7 +56,6 @@ const Profile: React.FC = () => {
     try {
       await updatePreferences(preferences).unwrap();
       message.success('Notification preferences updated successfully.');
-      dispatch(fetchUserProfile());
     } catch {
       message.error('Failed to update notification preferences.');
     } finally {
@@ -65,8 +63,12 @@ const Profile: React.FC = () => {
     }
   };
 
-  if (!userProfile) {
-    return <div>Loading profile...</div>;
+  if (isLoading) {
+    return <Spin size="large" />;
+  }
+
+  if (error || !userProfile) {
+    return <div>Error loading profile data</div>;
   }
 
   const gridStyle = {

@@ -59,7 +59,6 @@ const NotificationBell: React.FC = () => {
         })
         .catch(err => {
           console.error('Notification SignalR Connection Error: ', err);
-          message.error('Failed to connect to the notification server.');
         });
 
       return () => {
