@@ -17,7 +17,7 @@ export const AuthCallback = () => {
       if (code) {
         try {
           const tokens = await AzureADB2CService.handleCallback(code);
-
+          console.log({ tokens });
           dispatch(setAzureAuthTokens({
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token,

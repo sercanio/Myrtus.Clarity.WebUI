@@ -1,22 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { ApiService } from '@services/api';
-
-interface UserInfo {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  roles: {
-    id: string;
-    name: string;
-  }[];
-  avatarUrl?: string;
-  notificationPreference: {
-    isInAppNotificationEnabled: boolean;
-    isEmailNotificationEnabled: boolean;
-    isPushNotificationEnabled: boolean;
-  };
-}
+import { UserInfo } from '@types/user';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -30,7 +14,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   isAuthenticated: !!localStorage.getItem('id_token'),
-  accessToken: localStorage.getItem('access_token'),
+  accessToken: localStorage.getItem('id_token'),
   refreshToken: localStorage.getItem('refresh_token'),
   userProfile: localStorage.getItem('user_profile') 
     ? JSON.parse(localStorage.getItem('user_profile')!) 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Flex } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Flex, Badge, Menu } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   UserOutlined,
@@ -16,6 +16,8 @@ import {
 import { AzureADB2CService } from '@services/azureAdB2CService';
 import { logout } from '@store/slices/authSlice';
 import type { RootState } from '@store/index';
+import { useAppDispatch } from '@store/hooks';
+import NotificationBell from '@components/NotificationBell';
 const { Header: AntHeader } = Layout;
 
 interface HeaderProps {
@@ -26,7 +28,7 @@ interface HeaderProps {
 }
 
 const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, userProfile } = useSelector((state: RootState) => state.auth);
   const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
@@ -125,23 +127,25 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             checked={isDarkMode}
             onChange={setDarkMode}
           />
-
           {isAuthenticated ? (
-            <Dropdown
-              menu={{ items: userMenuItems }}
-              trigger={['hover']}
-              placement="bottomLeft"
-            >
-              <Avatar
-                size="large"
-                src={userProfile?.avatarUrl}
-                icon={!userProfile?.avatarUrl && <UserOutlined />}
-                style={{
-                  backgroundColor: '#1890ff',
-                  cursor: 'pointer'
-                }}
-              />
-            </Dropdown>
+            <>
+              <NotificationBell />
+              <Dropdown
+                menu={{ items: userMenuItems }}
+                trigger={['hover', 'click']}
+                placement="bottomLeft"
+              >
+                <Avatar
+                  size="large"
+                  src={userProfile?.avatarUrl}
+                  icon={!userProfile?.avatarUrl && <UserOutlined />}
+                  style={{
+                    backgroundColor: '#1890ff',
+                    cursor: 'pointer'
+                  }}
+                />
+              </Dropdown>
+            </>
           ) : (
             <Button
               type="primary"

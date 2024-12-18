@@ -2,6 +2,7 @@ import { api } from '@store/api';
 import type { User } from '@types/user';
 import type { PaginatedResponse } from '@types/PaginatedResponse';
 import type { DynamicQuery } from '@types/dynamicQuery';
+import type { Notification } from '@types/notification';
 
 export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -63,7 +64,20 @@ export const userApi = api.injectEndpoints({
       }),
       providesTags: ['Users'],
     }),
+    getNotifications: builder.query<PaginatedResponse<Notification>, { pageIndex: number; pageSize: number }>({
+      query: ({ pageIndex, pageSize }) => ({
+        url: 'notifications',
+        params: {
+          pageIndex,
+          pageSize
+        },
+      }),
+      providesTags: ['Notifications'],
+    }),
   }),
+  overrideExisting: false,
+}).enhanceEndpoints({
+  addTagTypes: ['Users', 'AuditLogs', 'Notifications'],
 });
 
 export const { 
@@ -71,5 +85,6 @@ export const {
   useGetUserDetailsQuery,
   useUpdateUserRoleMutation,
   useGetUsersDynamicQuery,
-  useGetUsersByRoleQuery
-} = userApi; 
+  useGetUsersByRoleQuery,
+  useGetNotificationsQuery
+} = userApi;

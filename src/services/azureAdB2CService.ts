@@ -34,7 +34,7 @@ export class AzureADB2CService {
             client_id: AZURE_AD_B2C_CONFIG.clientId,
             redirect_uri: AZURE_AD_B2C_CONFIG.redirectUri,
             response_type: 'code',
-            scope: 'openid offline_access',
+            scope: 'openid profile offline_access https://myrtustech.onmicrosoft.com/21490973-48a2-4037-93e2-834b5981be94/api_basic',
             nonce: 'defaultNonce',
             prompt: 'login',
             code_challenge: codeChallenge,

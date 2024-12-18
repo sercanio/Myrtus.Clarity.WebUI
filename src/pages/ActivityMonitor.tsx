@@ -64,7 +64,7 @@ const ActivityMonitor: React.FC = () => {
 
         connection.start()
             .then(() => {
-                console.log('SignalR Connected!');
+                console.log('AuditLog SignalR Connected!');
             })
             .catch(err => {
                 console.error('SignalR Connection Error: ', err);
