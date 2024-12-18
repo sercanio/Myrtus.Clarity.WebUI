@@ -7,9 +7,7 @@ const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
-    const token = state.auth.accessToken;    
-    console.log('Preparing headers with token:', { token });
-    
+    const token = state.auth.accessToken;        
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     } else {

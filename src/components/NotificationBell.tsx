@@ -8,13 +8,14 @@ import type { Notification } from '@types/notification';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/index'; // Adjust the import path as necessary
 import { Link } from 'react-router-dom';
+import { useGetCurrentUserQuery } from '@store/services/accountApi';
 
 const NotificationBell: React.FC = () => {
   const dispatch = useAppDispatch();
   const notifications = useSelector((state: RootState) => state.ui.notifications);
   const notificationCount = useSelector((state: RootState) => state.ui.notificationCount);
   const authSlice = useSelector((state: RootState) => state.auth);
-  const userProfile = useSelector((state: RootState) => state.auth.userProfile);
+  const { data: userProfile } = useGetCurrentUserQuery();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -27,6 +28,8 @@ const NotificationBell: React.FC = () => {
 
   const isInAppNotificationsEnabled = userProfile?.notificationPreference.isInAppNotificationEnabled;
 
+  const [messageApi, contextHolder] = message.useMessage();
+
   useEffect(() => {
     if (notificationsData && isInAppNotificationsEnabled) {
       dispatch(setNotifications(notificationsData.items));
@@ -34,10 +37,10 @@ const NotificationBell: React.FC = () => {
   }, [notificationsData, dispatch, isInAppNotificationsEnabled]);
 
   useEffect(() => {
-    if (authSlice.idToken) {
+    if (authSlice.accessToken) {
       const newConnection = new HubConnectionBuilder()
         .withUrl('https://localhost:5001/notificationHub', {
-          accessTokenFactory: () => authSlice.idToken as string,
+          accessTokenFactory: () => authSlice.accessToken as string,
         })
         .configureLogging(LogLevel.Information)
         .withAutomaticReconnect()
@@ -45,7 +48,7 @@ const NotificationBell: React.FC = () => {
 
       setConnection(newConnection);
     }
-  }, [authSlice.idToken]);
+  }, [authSlice.accessToken]);
 
   useEffect(() => {
     if (connection && isInAppNotificationsEnabled) {
@@ -54,7 +57,7 @@ const NotificationBell: React.FC = () => {
           console.log('Notification SignalR Connected!');
           connection.on('ReceiveNotification', (notification: Notification) => {
             dispatch(addNotification(notification));
-            message.info(`${notification.details}`);
+            messageApi.info(`${notification.details}`);
           });
         })
         .catch(err => {
@@ -66,7 +69,7 @@ const NotificationBell: React.FC = () => {
         connection.stop();
       };
     }
-  }, [connection, dispatch, isInAppNotificationsEnabled]);
+  }, [connection, dispatch, isInAppNotificationsEnabled, messageApi]);
 
   const handleBellClick = () => {
     // dispatch(resetNotificationCount());
@@ -77,7 +80,6 @@ const NotificationBell: React.FC = () => {
   const handleMarkAllAsRead = () => {
     if (hasUnread) {
       dispatch(resetNotificationCount());
-      message.success('All notifications marked as read.');
     }
   };
 
@@ -95,58 +97,69 @@ const NotificationBell: React.FC = () => {
   }, [currentPage, pageSize, refetch]);
 
   const notificationMenu = {
-    items: isInAppNotificationsEnabled ? [
-      {
-        key: 'mark-all',
-        label: (
-          <Typography.Link
-            onClick={handleMarkAllAsRead}
-            style={{
-              display: 'block',
-              textAlign: 'center',
-              color: hasUnread ? undefined : '#ccc',
-              cursor: hasUnread ? 'pointer' : 'not-allowed',
-            }}
-          >
-            Mark all as read
-          </Typography.Link>
-        ),
-      },
-      ...(notifications || []).map((notification) => ({
-        key: notification.id,
-        label: (
-          <Flex vertical style={{ width: '300px', padding: '.5rem' }}>
-            {
-              notification.isRead ? (
-                <Typography.Text>{notification.details}</Typography.Text>
-              ) : (
-                <Typography.Text strong>{notification.details}</Typography.Text>
-              )
-            }
-            <Typography.Text type="secondary">
-              {new Date(notification.timestamp).toLocaleString()}
+    items: isInAppNotificationsEnabled ? (
+      notifications.length > 0 ? [
+        {
+          key: 'mark-all',
+          label: (
+            <Typography.Link
+              onClick={handleMarkAllAsRead}
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                color: hasUnread ? undefined : '#ccc',
+                cursor: hasUnread ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Mark all as read
+            </Typography.Link>
+          ),
+        },
+        ...notifications.map((notification) => ({
+          key: notification.id,
+          label: (
+            <Flex vertical style={{ width: '300px', padding: '.5rem' }}>
+              {
+                notification.isRead ? (
+                  <Typography.Text>{notification.details}</Typography.Text>
+                ) : (
+                  <Typography.Text strong>{notification.details}</Typography.Text>
+                )
+              }
+              <Typography.Text type="secondary">
+                {new Date(notification.timestamp).toLocaleString()}
+              </Typography.Text>
+            </Flex>
+          ),
+        })),
+        {
+          key: 'pagination',
+          label: (
+            <div
+              style={{ textAlign: 'center', padding: '8px 0' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={notificationsData?.totalCount || 0}
+                onChange={handlePageChange}
+                size="small"
+              />
+            </div>
+          ),
+        },
+      ] : [
+        {
+          key: 'no-notifications',
+          label: (
+            <Typography.Text style={{ padding: '12px', display: 'block', textAlign: 'center' }}>
+              Nothing to see here!
             </Typography.Text>
-          </Flex>
-        ),
-      })),
-      {
-        key: 'pagination',
-        label: (
-          <div
-            style={{ textAlign: 'center', padding: '8px 0' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={notificationsData?.totalCount || 0}
-              onChange={handlePageChange}
-              size="small"
-            />
-          </div>
-        ),
-      },
-    ] : [
+          ),
+        }
+      ]
+    ) : [
       {
         key: 'no-notifications',
         label: (
@@ -161,17 +174,20 @@ const NotificationBell: React.FC = () => {
   };
 
   return (
-    <Badge count={notificationCount} offset={[-1, 1]}>
-      <Dropdown
-        menu={notificationMenu}
-        trigger={['click']}
-        onClick={handleBellClick}
-      >
-        <span>
-          <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
-        </span>
-      </Dropdown>
-    </Badge>
+    <>
+      {contextHolder}
+      <Badge count={notificationCount} offset={[-1, 1]}>
+        <Dropdown
+          menu={notificationMenu}
+          trigger={['click']}
+          onClick={handleBellClick}
+        >
+          <span>
+            <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
+          </span>
+        </Dropdown>
+      </Badge>
+    </>
   );
 };
 

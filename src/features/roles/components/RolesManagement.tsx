@@ -32,6 +32,8 @@ const RolesManagement = () => {
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
 
+  const [messageApi, contextHolder] = message.useMessage();
+
   const { data: rolesData, isLoading: isLoadingRoles } = useGetRolesQuery({
     pageIndex: 0,
     pageSize: 10
@@ -84,25 +86,25 @@ const RolesManagement = () => {
         operation: checked ? 'Add' : 'Remove'
       }).unwrap();
 
-      message.success(`Permission ${checked ? 'added to' : 'removed from'} role`);
-    } catch {
-      message.error('Failed to update permission');
+      messageApi.success(`Permission ${checked ? 'added to' : 'removed from'} role`);
+    } catch (error: any) {
+      messageApi.error(error.data?.errors || 'Failed to update permission');
     }
   };
 
   const handleCreateRole = async () => {
     try {
       await createRole({ name: newRoleName }).unwrap();
-      message.success('Role created successfully');
+      messageApi.success('Role created successfully');
       setIsCreateModalOpen(false);
       setNewRoleName('');
     } catch (error: any) {
       if (error.data?.errors) {
         error.data.errors.forEach((errorMessage: string) => {
-          message.error(errorMessage);
+          messageApi.error(errorMessage);
         });
       } else {
-        message.error('Failed to create role');
+        messageApi.error('Failed to create role');
       }
     }
   };
@@ -110,17 +112,17 @@ const RolesManagement = () => {
   const handleDeleteRole = async (roleId: string) => {
     try {
       await deleteRole(roleId).unwrap();
-      message.success('Role deleted successfully');
+      messageApi.success('Role deleted successfully');
       if (selectedRoleId === roleId) {
         setSelectedRoleId(null);
       }
     } catch (error: any) {
       if (error.status === 403 && error.data?.errors) {
         error.data.errors.forEach((errorMessage: string) => {
-          message.error(errorMessage);
+          messageApi.error(errorMessage);
         });
       } else {
-        message.error('Failed to delete role');
+        messageApi.error('Failed to delete role');
       }
     }
   };
@@ -139,16 +141,17 @@ const RolesManagement = () => {
         name: editingRole.name,
       }).unwrap();
 
-      message.success('Role name updated successfully');
+      messageApi.success('Role name updated successfully');
       setIsEditNameModalOpen(false);
       setEditingRole(null);
-    } catch {
-      message.error('Failed to update role name');
+    } catch (error: any) {
+      messageApi.error(error.data?.errors || 'Failed to update role name');
     }
   };
 
   return (
     <>
+    {contextHolder}
       <Typography.Title level={2}>Roles Management</Typography.Title>
       <Layout style={{ background: 'inherit', flexDirection: screens.md ? 'row' : 'column' }}>
         <Sider width={screens.md ? 300 : '100%'} style={{ background: 'inherit', marginBottom: screens.md ? 0 : 16 }}>

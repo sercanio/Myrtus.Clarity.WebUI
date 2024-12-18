@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setLoading } from '../../../store/slices/uiSlice';
+import { setLoading } from '@store/slices/uiSlice';
 import {
     Table,
     Card,
@@ -11,7 +11,6 @@ import {
     Form,
     Pagination,
     Grid,
-    Select,
     Layout,
     Typography
 } from 'antd';
@@ -23,16 +22,16 @@ import {
     useUpdateUserRoleMutation,
     useGetUsersDynamicQuery,
     useGetUsersByRoleQuery
-} from '../../../store/services/userApi';
-import { useGetRolesQuery } from '../../../store/services/roleApi';
-import { useRegisterMutation } from '../../../store/services/accountApi';
-import { RegisterUser } from '../../../types/registerUser';
+} from '@store/services/userApi';
+import { useGetRolesQuery } from '@store/services/roleApi';
+import { useRegisterMutation } from '@store/services/accountApi';
 import { UserSearchFilters } from './UserSearchFilters';
 import { EditUserModal } from './EditUserModal';
+import { RegisterUser } from '@types/registerUser';
 import { RegisterUserModal } from './RegisterUserModal';
-import type { ErrorResponse } from '../../../types/errorResponse';
-import type { User } from '../../../types/user';
-import type { Role } from '../../../types/role';
+import type { ErrorResponse } from '@types/errorResponse';
+import type { UserInfo } from '@types/user';
+import type { Role } from '@types/role';
 
 const { Content } = Layout;
 
@@ -42,7 +41,7 @@ const UsersTable = () => {
     const [pageSize, setPageSize] = useState(10);
     const [registerUserModalVisible, setRegisterUserModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
     const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
     const [, setHasChanges] = useState(false);
     const [registerUser] = useRegisterMutation();
@@ -63,6 +62,8 @@ const UsersTable = () => {
     const [sortField, setSortField] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<string | null>(null);
     const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>();
+
+    const [messageApi, contextHolder] = message.useMessage();
 
     interface FilterDescriptor {
         field: string;
@@ -114,7 +115,7 @@ const UsersTable = () => {
         []
     );
 
-    const handleTableChange: TableProps<User>['onChange'] = (_pagination, _filters, sorter) => {
+    const handleTableChange: TableProps<UserInfo>['onChange'] = (_pagination, _filters, sorter) => {
         if ('field' in sorter && 'order' in sorter) {
             setSortField(sorter.field as string);
             setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
@@ -124,7 +125,7 @@ const UsersTable = () => {
         }
     };
 
-    const handleEditClick = (user: User) => {
+    const handleEditClick = (user: UserInfo) => {
         setSelectedUser(user);
         setSelectedRoles(new Set(user.roles.map(role => role.id)));
         setHasChanges(false);
@@ -157,13 +158,13 @@ const UsersTable = () => {
                 roles: updatedRoles.filter((role): role is Role => role !== undefined)
             });
 
-            message.success(`Role ${checked ? 'added' : 'removed'} successfully`);
+            messageApi.success(`Role ${checked ? 'added' : 'removed'} successfully`);
         } catch {
-            message.error(`Failed to ${checked ? 'add' : 'remove'} role`);
+            messageApi.error(`Failed to ${checked ? 'add' : 'remove'} role`);
         }
     };
 
-    const columns: ColumnsType<User> = [
+    const columns: ColumnsType<UserInfo> = [
         {
             title: 'Name',
             key: 'name',
@@ -203,7 +204,7 @@ const UsersTable = () => {
     const handleRegisterUser = async (values: RegisterUser) => {
         try {
             await registerUser(values).unwrap();
-            message.success('User registered successfully');
+            messageApi.success('User registered successfully');
             setRegisterUserModalVisible(false);
             form.resetFields();
             refetch();
@@ -213,7 +214,7 @@ const UsersTable = () => {
                 || (error as ErrorResponse).data?.errors?.join(', ')
                 || 'Failed to register user';
 
-            message.error(errorMessage);
+            messageApi.error(errorMessage);
         }
     };
 
@@ -221,83 +222,86 @@ const UsersTable = () => {
     const screens = useBreakpoint();
 
     return (
-        <Layout style={{ background: 'inherit', padding: 0 }}>
-            <Content style={{ padding: 0, width: '100%' }}>
-                <Typography.Title level={2}>Users Management</Typography.Title>
-                <Card
-                    title="Users"
-                    extra={
-                        <Button
-                            type="primary"
-                            onClick={() => setRegisterUserModalVisible(true)}
-                        >
-                            New User
-                        </Button>
-                    }
-                    style={{
-                        margin: screens.xs ? '2px 0px' : '2px 16px',
-                        padding: screens.xs ? '4px 0px' : '4px',
-                    }}
-                    bodyStyle={{
-                        padding: screens.xs ? '4px' : '16px',
-                    }}
-                    headStyle={{
-                        padding: screens.xs ? '4px 6px' : '4px',
-                    }}
-                >
-                    <UserSearchFilters
-                        onSearchFieldChange={setSearchField}
-                        onSearchTextChange={debouncedSearch}
-                        onRoleFilterChange={setSelectedRoleId}
-                        selectedRoleId={selectedRoleId}
-                        roles={rolesData?.items}
-                    />
-                    <Table<User>
-                        columns={columns}
-                        dataSource={userData?.items}
-                        loading={isLoading}
-                        rowKey="id"
-                        pagination={false}
-                        onChange={handleTableChange}
+        <>
+            {contextHolder}
+            <Layout style={{ background: 'inherit', padding: 0 }}>
+                <Content style={{ padding: 0, width: '100%' }}>
+                    <Typography.Title level={2}>Users Management</Typography.Title>
+                    <Card
+                        title="Users"
+                        extra={
+                            <Button
+                                type="primary"
+                                onClick={() => setRegisterUserModalVisible(true)}
+                            >
+                                New User
+                            </Button>
+                        }
                         style={{
-                            width: '100%',
-                            overflowX: 'auto',
+                            margin: screens.xs ? '2px 0px' : '2px 16px',
+                            padding: screens.xs ? '4px 0px' : '4px',
                         }}
+                        bodyStyle={{
+                            padding: screens.xs ? '4px' : '16px',
+                        }}
+                        headStyle={{
+                            padding: screens.xs ? '4px 6px' : '4px',
+                        }}
+                    >
+                        <UserSearchFilters
+                            onSearchFieldChange={setSearchField}
+                            onSearchTextChange={debouncedSearch}
+                            onRoleFilterChange={setSelectedRoleId}
+                            selectedRoleId={selectedRoleId}
+                            roles={rolesData?.items}
+                        />
+                        <Table<UserInfo>
+                            columns={columns}
+                            dataSource={userData?.items}
+                            loading={isLoading}
+                            rowKey="id"
+                            pagination={false}
+                            onChange={handleTableChange}
+                            style={{
+                                width: '100%',
+                                overflowX: 'auto',
+                            }}
+                        />
+                        <Pagination
+                            current={pageIndex + 1}
+                            pageSize={pageSize}
+                            total={userData?.totalCount}
+                            onChange={(page, newPageSize) => {
+                                setPageIndex(page - 1);
+                                setPageSize(newPageSize);
+                            }}
+                            responsive
+                            showSizeChanger
+                            showTotal={total => `${total} Users in total`}
+                            style={{
+                                marginTop: 16,
+                                textAlign: 'right',
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                            }}
+                        />
+                    </Card>
+                    <EditUserModal
+                        visible={editModalVisible}
+                        onClose={() => setEditModalVisible(false)}
+                        selectedUser={selectedUser}
+                        roles={roles}
+                        selectedRoles={selectedRoles}
+                        onRoleChange={handleRoleChange}
                     />
-                    <Pagination
-                        current={pageIndex + 1}
-                        pageSize={pageSize}
-                        total={userData?.totalCount}
-                        onChange={(page, newPageSize) => {
-                            setPageIndex(page - 1);
-                            setPageSize(newPageSize);
-                        }}
-                        responsive
-                        showSizeChanger
-                        showTotal={total => `${total} Users in total`}
-                        style={{
-                            marginTop: 16,
-                            textAlign: 'right',
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                        }}
+                    <RegisterUserModal
+                        visible={registerUserModalVisible}
+                        onClose={() => setRegisterUserModalVisible(false)}
+                        onRegister={handleRegisterUser}
                     />
-                </Card>
-                <EditUserModal
-                    visible={editModalVisible}
-                    onClose={() => setEditModalVisible(false)}
-                    selectedUser={selectedUser}
-                    roles={roles}
-                    selectedRoles={selectedRoles}
-                    onRoleChange={handleRoleChange}
-                />
-                <RegisterUserModal
-                    visible={registerUserModalVisible}
-                    onClose={() => setRegisterUserModalVisible(false)}
-                    onRegister={handleRegisterUser}
-                />
-            </Content>
-        </Layout>
+                </Content>
+            </Layout>
+        </>
     );
 };
 

@@ -23,7 +23,7 @@ const msalConfig: Configuration = {
     loggerOptions: {
       loggerCallback: (level, message) => {
         // Implement your logging mechanism
-        console.log(message);
+        // console.log(message);
       },
       piiLoggingEnabled: false,
     },
@@ -35,15 +35,15 @@ export const msalInstance = new PublicClientApplication(msalConfig);
 // Initialize MSAL instance
 await msalInstance.initialize();
 
-const getScopes = () => {
-  try {
-    const scopes = import.meta.env.VITE_AZURE_AD_B2C_SCOPES || DEFAULT_SCOPES;
-    return scopes.split(' ').filter(Boolean);
-  } catch (error) {
-    console.error('Error parsing scopes:', error);
-    return ['openid', 'profile', 'offline_access'];
-  }
-};
+// const getScopes = () => {
+//   try {
+//     const scopes = import.meta.env.VITE_AZURE_AD_B2C_SCOPES || DEFAULT_SCOPES;
+//     return scopes.split(' ').filter(Boolean);
+//   } catch (error) {
+//     console.error('Error parsing scopes:', error);
+//     return ['openid', 'profile', 'offline_access'];
+//   }
+// };
 
 const loginRequest: PopupRequest = {
   scopes: [API_SCOPE], // Request only the API scope during login

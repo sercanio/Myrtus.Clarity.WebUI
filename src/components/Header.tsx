@@ -40,6 +40,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const { data: userProfile } = useGetCurrentUserQuery(undefined, {
     skip: !isAuthenticated,
   });
+  
 
   useEffect(() => {
     const handleResize = () => {
