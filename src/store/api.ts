@@ -2,18 +2,11 @@ import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit
 import { BaseQueryFn, FetchArgs } from '@reduxjs/toolkit/query';
 import { AzureADB2CService } from '@services/azureAdB2CService';
 import { setAzureAuthTokens, logout, fetchUserProfile } from '@store/slices/authSlice';
-import { useMsal } from '@azure/msal-react';
-
-const useAuthToken = () => {
-  const { accounts } = useMsal();
-  return accounts[0].idTokenClaims?.['access_token'];
-};
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL,
-  prepareHeaders: (headers, { getState }) => {
-    // retrieve token from MSAL and set it in the headers
-    const token = useAuthToken();
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem('id_token'); 
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }

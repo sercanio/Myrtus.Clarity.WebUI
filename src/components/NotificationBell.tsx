@@ -13,7 +13,7 @@ const NotificationBell: React.FC = () => {
   const dispatch = useAppDispatch();
   const notifications = useSelector((state: RootState) => state.ui.notifications);
   const notificationCount = useSelector((state: RootState) => state.ui.notificationCount);
-  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const authSlice = useSelector((state: RootState) => state.auth);
   const userProfile = useSelector((state: RootState) => state.auth.userProfile);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,16 +34,18 @@ const NotificationBell: React.FC = () => {
   }, [notificationsData, dispatch, isInAppNotificationsEnabled]);
 
   useEffect(() => {
-    const newConnection = new HubConnectionBuilder()
-      .withUrl('https://localhost:5001/notificationHub', {
-        accessTokenFactory: () => accessToken || '',
-      })
-      .configureLogging(LogLevel.Information)
-      .withAutomaticReconnect()
-      .build();
+    if (authSlice.idToken) {
+      const newConnection = new HubConnectionBuilder()
+        .withUrl('https://localhost:5001/notificationHub', {
+          accessTokenFactory: () => authSlice.idToken as string,
+        })
+        .configureLogging(LogLevel.Information)
+        .withAutomaticReconnect()
+        .build();
 
-    setConnection(newConnection);
-  }, []);
+      setConnection(newConnection);
+    }
+  }, [authSlice.idToken]);
 
   useEffect(() => {
     if (connection && isInAppNotificationsEnabled) {
@@ -51,8 +53,8 @@ const NotificationBell: React.FC = () => {
         .then(() => {
           console.log('Notification SignalR Connected!');
           connection.on('ReceiveNotification', (notification: Notification) => {
-              dispatch(addNotification(notification));
-              message.info(`${notification.details}`);           
+            dispatch(addNotification(notification));
+            message.info(`${notification.details}`);
           });
         })
         .catch(err => {
@@ -74,7 +76,7 @@ const NotificationBell: React.FC = () => {
   const hasUnread = notifications.some(notification => !notification.isRead);
 
   const handleMarkAllAsRead = () => {
-    if (hasUnread) { 
+    if (hasUnread) {
       dispatch(resetNotificationCount());
       message.success('All notifications marked as read.');
     }
