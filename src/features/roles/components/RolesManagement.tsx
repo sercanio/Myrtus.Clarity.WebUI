@@ -3,7 +3,7 @@ import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
-import { setLoading } from '../../../store/slices/uiSlice';
+import { setLoading } from '@store/slices/uiSlice';
 import {
   useGetRolesQuery,
   useGetPermissionsQuery,
@@ -12,9 +12,9 @@ import {
   useCreateRoleMutation,
   useDeleteRoleMutation,
   useUpdateRoleNameMutation
-} from '../../../store/services/roleApi';
+} from '@store/services/roleApi';
 import { Role } from '@types/role';
-import { Permission } from '../../../types/permission';
+import { Permission } from '@types/permission';
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
@@ -88,7 +88,8 @@ const RolesManagement = () => {
 
       messageApi.success(`Permission ${checked ? 'added to' : 'removed from'} role`);
     } catch (error: any) {
-      messageApi.error(error.data?.errors || 'Failed to update permission');
+      console.log({error});
+      messageApi.error(error.data?.errors || error.data?.detail || 'Failed to update permission');
     }
   };
 
@@ -101,7 +102,7 @@ const RolesManagement = () => {
     } catch (error: any) {
       if (error.data?.errors) {
         error.data.errors.forEach((errorMessage: string) => {
-          messageApi.error(errorMessage);
+          messageApi.error(errorMessage || 'Failed to create role');
         });
       } else {
         messageApi.error('Failed to create role');
@@ -119,7 +120,7 @@ const RolesManagement = () => {
     } catch (error: any) {
       if (error.status === 403 && error.data?.errors) {
         error.data.errors.forEach((errorMessage: string) => {
-          messageApi.error(errorMessage);
+          messageApi.error(errorMessage || 'Failed to delete role');
         });
       } else {
         messageApi.error('Failed to delete role');
@@ -242,7 +243,7 @@ const RolesManagement = () => {
                       {(permissions as Permission[]).map((permission: Permission) => (
                         <Checkbox
                           key={permission.id}
-                          checked={roleDetails?.permissions?.some(p => p.id === permission.id)}
+                          checked={roleDetails?.permissions?.some((p) : {p : Permission} => p.id === permission.id)}
                           onChange={(e: CheckboxChangeEvent) =>
                             handlePermissionChange(permission.id, e.target.checked)
                           }
