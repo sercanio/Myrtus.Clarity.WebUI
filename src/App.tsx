@@ -9,8 +9,13 @@ import { ConfigProvider, theme } from 'antd';
 import useLocalStorage from '@hooks/useLocalStorage';
 import { useMsal } from '@azure/msal-react';
 import { useAppDispatch } from '@store/hooks';
-import { loginSuccess, logoutFailure } from '@store/slices/authSlice';
 import { acquireTokenSilent } from '@services/msalService';
+import { loginSuccess, logoutFailure } from '@store/slices/authSlice';
+import { useGetCurrentUserQuery } from '@store/services/accountApi';
+import { UserInfo } from '@types/user';
+import { useSelector } from 'react-redux';
+import { RootState } from './store';
+import { setUserLoading } from '@store/slices/uiSlice';
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -19,8 +24,12 @@ function App() {
   const [collapsed, setCollapsed] = useState(false);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('theme-preference', false);
   const screens = useBreakpoint();
-  const {  accounts } = useMsal();
+  const { accounts } = useMsal();
   const dispatch = useAppDispatch();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const { data: userProfile, isLoading, error } = useGetCurrentUserQuery(undefined, {
+    skip: !isAuthenticated
+  });
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -42,38 +51,53 @@ function App() {
 
   useEffect(() => {
     const processAccount = async () => {
-      if (accounts.length > 0) {
-        const account = accounts[0];
-        try {
-          const tokenResponse = await acquireTokenSilent(account);
-          
-          if (tokenResponse?.accessToken) {
-            const plainTenantProfiles = account.tenantProfiles
-              ? Object.fromEntries(account.tenantProfiles)
-              : {};
+      dispatch(setUserLoading(true));
+      try {
+        if (accounts.length > 0) {
+          const account = accounts[0];
+          try {
+            const tokenResponse = await acquireTokenSilent(account);
 
-            dispatch(loginSuccess({
-              account: {
-                ...account,
-                tenantProfiles: plainTenantProfiles,
-              },
-              accessToken: tokenResponse.accessToken,
-            }));
-          } else {
-            console.error('Token acquired but no access token present');
+            if (tokenResponse?.accessToken) {
+              const plainTenantProfiles: Record<string, UserInfo> = account.tenantProfiles
+                ? Object.fromEntries(
+                  Object.entries(account.tenantProfiles).map(([key, profile]) => [
+                    key, profile as UserInfo
+                  ])
+                )
+                : {};
+
+              dispatch(loginSuccess({
+                account: {
+                  ...account,
+                  tenantProfiles: plainTenantProfiles,
+                  firstName: userProfile?.firstName || '',
+                  lastName: userProfile?.lastName || '',
+                  roles: userProfile?.roles || [],
+                  notificationPreferences: userProfile?.notificationPreference,
+                  avatarUrl: userProfile?.avatarUrl || 'https://ui-avatars.com/api/?name=John+Doe&background=random&rounded=true&bold=true&size=128',
+                },
+                accessToken: tokenResponse.accessToken,
+              }));
+            } else {
+              console.error('Token acquired but no access token present');
+              dispatch(logoutFailure());
+            }
+          } catch (error) {
+            console.error('Token acquisition error:', error);
             dispatch(logoutFailure());
           }
-        } catch (error) {
-          console.error('Token acquisition error:', error);
+        } else {
           dispatch(logoutFailure());
         }
-      } else {
-        dispatch(logoutFailure());
+      } finally {
+        dispatch(setUserLoading(false));
       }
     };
 
     processAccount();
-  }, [accounts, dispatch]);
+  }, [accounts, dispatch, userProfile]);
+
 
   return (
     <BrowserRouter>

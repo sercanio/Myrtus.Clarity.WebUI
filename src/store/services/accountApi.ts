@@ -1,23 +1,11 @@
 import { api } from '@store/api';
 import type { RegisterUser } from '@types/registerUser';
+import { UserInfo } from '@types/user';
 
-export interface UserProfile {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string;
-  roles: { name: string }[];
-  notificationPreference: {
-    isInAppNotificationEnabled: boolean;
-    isEmailNotificationEnabled: boolean;
-    isPushNotificationEnabled: boolean;
-  };
-}
 
 export const accountApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getCurrentUser: builder.query<UserProfile, void>({
+    getCurrentUser: builder.query<UserInfo, void>({
       query: () => '/accounts/me',
       providesTags: ['Users'],
     }),

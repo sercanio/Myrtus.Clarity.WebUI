@@ -7,3 +7,9 @@ export interface Notification {
     details: string;
     isRead: boolean;
 }
+
+export interface NotificationPreference {
+    inAppNotification: boolean;
+    emailNotification: boolean;
+    pushNotification: boolean;
+}

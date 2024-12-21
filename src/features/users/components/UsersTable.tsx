@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setLoading } from '@store/slices/uiSlice';
 import {
     Table,

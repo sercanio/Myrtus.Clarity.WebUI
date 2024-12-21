@@ -3,6 +3,7 @@ import { Notification } from '@types/notification';
 
 interface UiState {
   isLoading: boolean;
+  isUserLoading: boolean;
   isDarkMode: boolean;
   notificationCount: number;
   notifications: Notification[];
@@ -10,6 +11,7 @@ interface UiState {
 
 const initialState: UiState = {
   isLoading: false,
+  isUserLoading: false,
   isDarkMode: false,
   notificationCount: 0,
   notifications: [],
@@ -21,6 +23,9 @@ const uiSlice = createSlice({
   reducers: {
     setLoading: (state, action: { payload: boolean }) => {
       state.isLoading = action.payload;
+    },
+    setUserLoading: (state, action: { payload: boolean }) => {
+      state.isUserLoading = action.payload;
     },
     toggleDarkMode: (state) => {
       state.isDarkMode = !state.isDarkMode;
@@ -46,16 +51,18 @@ const uiSlice = createSlice({
       state.notifications.forEach(notification => {
         notification.isRead = true;
       });
-    },
+    }
   },
 });
 
-export const { 
-  setLoading, 
-  toggleDarkMode, 
-  setNotificationCount, 
-  setNotifications, 
-  addNotification, 
+export const {
+  setLoading,
+  setUserLoading,
+  toggleDarkMode,
+  setNotificationCount,
+  setNotifications,
+  addNotification,
   resetNotificationCount,
 } = uiSlice.actions;
+
 export default uiSlice.reducer;

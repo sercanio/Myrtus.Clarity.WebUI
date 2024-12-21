@@ -1,15 +1,15 @@
-import { Card } from 'antd';
+import { Card, Avatar, Flex } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import React, { useRef, useMemo } from 'react';
-import { useGetCurrentUserQuery, useUpdateNotificationPreferencesMutation } from '@store/services/accountApi';
-import { Switch, Button, message, Spin } from 'antd';
+import { useUpdateNotificationPreferencesMutation } from '@store/services/accountApi';
+import { Switch, Button, message } from 'antd';
 import { useState } from 'react';
 import { Layout, Row, Col, Descriptions, Form, Typography } from 'antd';
-
-const { Content } = Layout;
-const { Title } = Typography;
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/index';
 
 const Profile: React.FC = () => {
-  const { data: userProfile, isLoading, error } = useGetCurrentUserQuery();
+  const user = useSelector((state: RootState) => state.auth.user);
   const [updatePreferences] = useUpdateNotificationPreferencesMutation();
   const [preferences, setPreferences] = useState({
     inAppNotification: false,
@@ -18,20 +18,19 @@ const Profile: React.FC = () => {
   });
 
   const initialPreferencesRef = useRef(preferences);
-
   const [messageApi, contextHolder] = message.useMessage();
 
   React.useEffect(() => {
-    if (userProfile?.notificationPreference) {
+    if (user?.notificationPreferences) {
       const initialPrefs = {
-        inAppNotification: userProfile.notificationPreference.isInAppNotificationEnabled,
-        emailNotification: userProfile.notificationPreference.isEmailNotificationEnabled,
-        pushNotification: userProfile.notificationPreference.isPushNotificationEnabled,
+        inAppNotification: user.notificationPreferences.isInAppNotificationEnabled,
+        emailNotification: user.notificationPreferences.isEmailNotificationEnabled,
+        pushNotification: user.notificationPreferences.isPushNotificationEnabled,
       };
       setPreferences(initialPrefs);
       initialPreferencesRef.current = initialPrefs;
     }
-  }, [userProfile]);
+  }, [user]);
 
   const isDirty = useMemo(() => {
     return (
@@ -59,37 +58,43 @@ const Profile: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return <Spin size="large" />;
+  if (!user) {
+    return <div>No user data available</div>;
   }
 
-  if (error || !userProfile) {
-    return <div>Error loading profile data</div>;
-  }
+  const firstName = user.firstName;
+  const lastName = user.lastName;
 
   return (
     <>
       {contextHolder}
       <Layout style={{ background: 'transparent', padding: 0 }}>
-        <Content style={{ padding: 0, maxWidth: '1200px' }}>
-          <Title level={2} style={{ textAlign: 'left' }}>Profile Management</Title>
+        <Layout.Content style={{ padding: 0, maxWidth: '1200px' }}>
+          <Typography.Title level={2} style={{ textAlign: 'left' }}>Profile Management</Typography.Title>
           <Row gutter={[24, 24]}>
             <Col xs={24} md={12}>
               <Card>
-                <Title level={3} style={{ marginBottom: 16 }}>User Profile</Title>
+                <Flex vertical align="center" style={{ marginBottom: 24 }}>
+                  <Avatar 
+                    size={128}
+                    src={user.avatarUrl}
+                    icon={!user.avatarUrl && <UserOutlined />}
+                  />
+                </Flex>
+                <Typography.Title level={3} style={{ marginBottom: 16 }}>User Profile</Typography.Title>
                 <Descriptions bordered column={1}>
-                  <Descriptions.Item label="First Name">{userProfile.firstName}</Descriptions.Item>
-                  <Descriptions.Item label="Last Name">{userProfile.lastName}</Descriptions.Item>
-                  <Descriptions.Item label="Email">{userProfile.email}</Descriptions.Item>
+                  <Descriptions.Item label="First Name">{firstName}</Descriptions.Item>
+                  <Descriptions.Item label="Last Name">{lastName}</Descriptions.Item>
+                  <Descriptions.Item label="Email">{user.username}</Descriptions.Item>
                   <Descriptions.Item label="Roles">
-                    {userProfile.roles.map((role) => role.name).join(', ')}
+                    {user.roles?.map((role) => role.name).join(', ') || 'No roles assigned'}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card>
-                <Title level={3} style={{ marginBottom: 16 }}>Notification Settings</Title>
+                <Typography.Title level={3} style={{ marginBottom: 16 }}>Notification Settings</Typography.Title>
                 <Form layout="vertical">
                   <Row gutter={[0, 0]}>
                     <Col span={24}>
@@ -131,7 +136,7 @@ const Profile: React.FC = () => {
               </Card>
             </Col>
           </Row>
-        </Content>
+        </Layout.Content>
       </Layout>
     </>
   );

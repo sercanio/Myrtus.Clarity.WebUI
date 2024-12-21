@@ -2,8 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm, Grid, Collapse, Tag, Spin } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { useDispatch } from 'react-redux';
-import { setLoading } from '@store/slices/uiSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import {  setLoading } from '@store/slices/uiSlice';
 import {
   useGetRolesQuery,
   useGetPermissionsQuery,

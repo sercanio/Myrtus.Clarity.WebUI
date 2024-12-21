@@ -1,7 +1,8 @@
-import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@store/index';
 import type { ReactNode } from 'react';
+import ForbiddenAccess from './ForbiddenAccess';
+import LoadingScreen from './LoadingScreen';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,23 +10,32 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) => {
-  const location = useLocation();
-  const { isAuthenticated, userProfile } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const { isUserLoading } = useSelector((state: RootState) => state.ui);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+  // Show loading screen while checking authentication
+  if (isUserLoading) {
+    return <LoadingScreen />;
+    // return null;
   }
 
-  if (requiredRoles.length > 0 && userProfile) {
-    const userRoleNames = userProfile.roles.map(role => role.name);
-    const hasRequiredRole = requiredRoles.some(role => userRoleNames.includes(role));
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
+    return null;
+  }
 
+  // Check for required roles
+  if (requiredRoles.length > 0 && user) {
+    const userRoleNames = user.roles?.map(role => role.name) || [];
+    const hasRequiredRole = requiredRoles.some(role => userRoleNames.includes(role));
+    
     if (!hasRequiredRole) {
-      return <Navigate to="/profile" replace />;
+      return <ForbiddenAccess />;
     }
   }
 
+  // All checks passed, render the protected content
   return <>{children}</>;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { BaseQueryFn, FetchArgs } from '@reduxjs/toolkit/query';
-import { logout } from '@store/slices/authSlice';
+// import { logout } from '@store/slices/authSlice';
 import type { RootState } from '@store/index';
+import { logoutUser } from '@services/msalService';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL,
@@ -33,7 +34,7 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   if (result.error && result.error.status === 401) {
-    api.dispatch(logout());
+    api.dispatch(logoutUser());
   }
 
   return result;

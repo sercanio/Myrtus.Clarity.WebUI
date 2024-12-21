@@ -1,3 +1,4 @@
+import { NotificationPreference } from "./notification";
 import { Role } from "./role";
 
 export interface UserInfo {
@@ -7,9 +8,5 @@ export interface UserInfo {
   lastName: string;
   roles: Role[];
   avatarUrl?: string;
-  notificationPreference: {
-    isInAppNotificationEnabled: boolean;
-    isEmailNotificationEnabled: boolean;
-    isPushNotificationEnabled: boolean;
-  };
+  notificationPreference: NotificationPreference
 }

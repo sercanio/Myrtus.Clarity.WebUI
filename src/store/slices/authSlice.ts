@@ -1,26 +1,28 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserAccount } from '@azure/msal-browser';
+import { AccountInfo } from '@azure/msal-browser';
+import { UserInfo } from '@types/user';
+import { NotificationPreference } from '@types/notification';
 
-interface TenantProfile {
-  // Define the structure of your tenant profile here
-  // Example:
-  // profileName: string;
-  // permissions: string[];
+interface ExtendedAccountInfo extends Omit<AccountInfo, 'tenantProfiles'> {
+  tenantProfiles: Record<string, UserInfo>;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  roles?: Array<{ name: string }>;
+  notificationPreferences?: NotificationPreference
 }
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: Omit<UserAccount, 'tenantProfiles'> & { tenantProfiles: Record<string, TenantProfile> } | null; // Updated
+  user: ExtendedAccountInfo | null;
   accessToken: string | null;
-  loading: boolean;
   error: string | null;
 }
 
-const initialState: AuthState = {
+const initialState: AuthState = { 
   isAuthenticated: false,
   user: null,
   accessToken: null,
-  loading: false,
   error: null,
 };
 
@@ -28,25 +30,13 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    loginRequest: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    loginSuccess: (state, action: PayloadAction<{ account: AuthState['user']; accessToken: string }>) => { // Updated
-      state.loading = false;
+    loginSuccess: (state, action: PayloadAction<{ account: AuthState['user']; accessToken: string }>) => {
       state.isAuthenticated = true;
       state.user = action.payload.account;
       state.accessToken = action.payload.accessToken;
     },
     loginFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
       state.error = action.payload;
-    },
-    logout: (state) => {
-      state.isAuthenticated = false;
-      state.user = null;
-      state.accessToken = null; 
-      state.error = null;
     },
     logoutFailure: (state) => {
       state.isAuthenticated = false;
@@ -58,10 +48,8 @@ const authSlice = createSlice({
 });
 
 export const { 
-  loginRequest, 
   loginSuccess, 
   loginFailure, 
-  logout,
   logoutFailure,
 } = authSlice.actions;
 export default authSlice.reducer;

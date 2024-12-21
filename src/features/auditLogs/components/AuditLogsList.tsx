@@ -1,14 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Table, Card, Pagination, Select, Grid, Input, Layout, Button } from 'antd';
 import { useGetAuditLogsQuery, useGetAuditLogsDynamicQuery } from '@store/services/auditLogApi';
 import debounce from 'lodash/debounce';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import type { AuditLog } from '@types/auditLog';
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import FormattedDate from '@components/FormattedDate';
 import { AuditLogSearchFilters } from './AuditLogSearchFilters';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '@store/slices/uiSlice';
 
-const { Option } = Select;
 const { useBreakpoint } = Grid;
 const { Content } = Layout;
 
@@ -20,6 +20,13 @@ const AuditLogsList: React.FC = () => {
     const [sortField, setSortField] = useState<string | null>(null);
     const [sortDirection, setSortDirection] = useState<string | null>(null);
     const [hasUserSorted, setHasUserSorted] = useState(false);
+
+    const dispatch = useDispatch();
+
+
+    useEffect(() => {
+        dispatch(setLoading(isLoading));
+    }, [dispatch]);
 
     const buildFilterDescriptor = (text: string, field: string) => {
         if (!text) return undefined;

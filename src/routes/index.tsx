@@ -14,7 +14,8 @@ import Landing from '@pages/Landing';
 // Define role constants
 const ROLES = {
   ADMIN: 'Admin',
-  REGISTERED: 'Registered'
+  EDITOR: 'Editor',
+  REGISTERED: 'Registered',
 } as const;
 
 function AppRoutes() {

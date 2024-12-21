@@ -14,8 +14,8 @@ import {
   MenuUnfoldOutlined
 } from '@ant-design/icons';
 import { useMsal, useAccount } from '@azure/msal-react';
-import { login, logoutUser, msalInstance } from '@services/msalService';
-import { loginSuccess, logout } from '@store/slices/authSlice';
+import { login, logoutUser } from '@services/msalService';
+import { loginSuccess } from '@store/slices/authSlice';
 import type { RootState } from '@store/index';
 import { useAppDispatch } from '@store/hooks';
 import NotificationBell from '@components/NotificationBell';
@@ -33,7 +33,7 @@ interface HeaderProps {
 const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated} = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
@@ -54,7 +54,6 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
     const acquireAndStoreToken = async () => {
       if (isAuthenticated && account) {
         try {
-          await msalInstance.initialize()
           const response = await instance.acquireTokenSilent({
             scopes: import.meta.env.VITE_AZURE_AD_B2C_SCOPES.split(' '),
             account: account,
@@ -94,7 +93,6 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
           },
           accessToken: result.accessToken,
         }));
-        navigate('/');
       } else {
         console.error('Login successful but no access token received');
       }
@@ -106,8 +104,6 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
 
   const handleLogout = () => {
     logoutUser();
-    dispatch(logout());
-    navigate('/');
   };
 
   const userMenuItems: MenuProps['items'] = [
@@ -196,8 +192,8 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
               >
                 <Avatar
                   size="large"
-                  src={userProfile?.avatarUrl}
-                  icon={!userProfile?.avatarUrl && <UserOutlined />}
+                  src={user?.avatarUrl}
+                  icon={!user?.avatarUrl && <UserOutlined />}
                   style={{
                     backgroundColor: '#1890ff',
                     cursor: 'pointer'

@@ -31,6 +31,7 @@
       "@styles/*": ["src/styles/*"],
       "@services/*": ["src/services/*"],
       "@pages/*": ["src/pages/*"],
+      "@config/*": ["src/config/*"],
     }
   },
   "include": ["src"],
