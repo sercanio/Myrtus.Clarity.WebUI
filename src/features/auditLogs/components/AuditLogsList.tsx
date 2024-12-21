@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Table, Card, Pagination, Select, Grid, Space, Input, Layout, Typography } from 'antd';
-import { useGetAuditLogsDynamicQuery } from '../../../store/services/auditLogApi';
+import { Table, Card, Pagination, Select, Grid, Input, Layout, Button } from 'antd';
+import { useGetAuditLogsQuery, useGetAuditLogsDynamicQuery } from '@store/services/auditLogApi';
 import debounce from 'lodash/debounce';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import type { AuditLog } from '../../../types/auditLog';
-import { SearchOutlined } from '@ant-design/icons';
-import FormattedDate from '../../../components/FormattedDate';
+import type { AuditLog } from '@types/auditLog';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import FormattedDate from '@components/FormattedDate';
+import { AuditLogSearchFilters } from './AuditLogSearchFilters';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
@@ -16,8 +17,9 @@ const AuditLogsList: React.FC = () => {
     const [pageSize, setPageSize] = useState(10);
     const [searchText, setSearchText] = useState('');
     const [searchField, setSearchField] = useState('action');
-    const [sortField, setSortField] = useState<string | null>("timestamp");
-    const [sortDirection, setSortDirection] = useState<string | null>("desc");
+    const [sortField, setSortField] = useState<string | null>(null);
+    const [sortDirection, setSortDirection] = useState<string | null>(null);
+    const [hasUserSorted, setHasUserSorted] = useState(false);
 
     const buildFilterDescriptor = (text: string, field: string) => {
         if (!text) return undefined;
@@ -29,27 +31,71 @@ const AuditLogsList: React.FC = () => {
         };
     };
 
-    const { data: auditLogs, isFetching: isLoading } = useGetAuditLogsDynamicQuery({
-        pageIndex,
-        pageSize,
-        sort: sortField && sortDirection ? [{ field: sortField, dir: sortDirection }] : undefined,
-        filter: buildFilterDescriptor(searchText, searchField)
-    });
+    const shouldUseDynamicQuery = Boolean(searchText || (hasUserSorted && sortField));
+
+    const {
+        data: auditLogs, 
+        isFetching: isLogListLoading,
+        refetch: refetchNormalQuery
+    } = useGetAuditLogsQuery(
+        { pageIndex, pageSize },
+        { skip: shouldUseDynamicQuery }
+    );
+
+    const { 
+        data: auditLogsDynamic, 
+        isFetching: isDynamicLogListLoading,
+        refetch: refetchDynamicQuery 
+    } = useGetAuditLogsDynamicQuery(
+        {
+            pageIndex,
+            pageSize,
+            sort: sortField && sortDirection ? [{ field: sortField, dir: sortDirection }] : undefined,
+            filter: buildFilterDescriptor(searchText, searchField)
+        },
+        { skip: !shouldUseDynamicQuery }
+    );
+
+    const currentData = shouldUseDynamicQuery ? auditLogsDynamic : auditLogs;
+    const isLoading = shouldUseDynamicQuery ? isDynamicLogListLoading : isLogListLoading;
 
     const debouncedSearch = useMemo(
         () => debounce((value: string) => {
             setSearchText(value);
+            // Reset to first page when search is cleared
+            if (!value) {
+                setPageIndex(0);
+                // Ensure we're using the normal query by resetting sort state
+                setHasUserSorted(false);
+                setSortField(null);
+                setSortDirection(null);
+            }
         }, 500),
         []
     );
 
     const handleTableChange: TableProps<AuditLog>['onChange'] = (_pagination, _filters, sorter) => {
+        setHasUserSorted(true);
         if ('field' in sorter && 'order' in sorter) {
             setSortField(sorter.field as string);
             setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
         } else {
             setSortField(null);
             setSortDirection(null);
+        }
+    };
+
+    const handleRefresh = () => {
+        if (searchText) {
+            // If there's search text, just refresh the dynamic query
+            refetchDynamicQuery();
+        } else {
+            // If no search text, reset states and refresh normal query
+            setPageIndex(0);
+            setHasUserSorted(false);
+            setSortField(null);
+            setSortDirection(null);
+            setTimeout(() => refetchNormalQuery(), 0);
         }
     };
 
@@ -86,31 +132,15 @@ const AuditLogsList: React.FC = () => {
                         padding: screens.xs ? '4px 6px' : '4px',
                     }}
                 >
-                    <Input.Group
-                        compact
-                        style={{
-                            display: 'flex',
-                            flexDirection: screens.xs ? 'column' : 'row',
-                            margin: '16px 0 32px 0'
-                        }}>
-                        <Select
-                            defaultValue="action"
-                            style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
-                            onChange={setSearchField}
-                        >
-                            <Option value="user">User</Option>
-                            <Option value="action">Action</Option>
-                            <Option value="entity">Entity</Option>
-                        </Select>
-                        <Input
-                            placeholder="Search logs..."
-                            prefix={<SearchOutlined />}
-                            onChange={e => debouncedSearch(e.target.value)}
-                            style={{ width: screens.xs ? '100%' : 200 }} />
-                    </Input.Group>
+                    <AuditLogSearchFilters
+                        onSearchFieldChange={setSearchField}
+                        onSearchTextChange={debouncedSearch}
+                        onRefresh={handleRefresh}
+                        isLoading={isLoading}
+                    />
                     <Table<AuditLog>
                         columns={columns}
-                        dataSource={auditLogs?.items}
+                        dataSource={currentData?.items}
                         loading={isLoading}
                         rowKey="id"
                         pagination={false}
@@ -120,7 +150,7 @@ const AuditLogsList: React.FC = () => {
                     <Pagination
                         current={pageIndex + 1}
                         pageSize={pageSize}
-                        total={auditLogs?.totalCount}
+                        total={currentData?.totalCount}
                         onChange={(page, newPageSize) => {
                             setPageIndex(page - 1);
                             setPageSize(newPageSize);

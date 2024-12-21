@@ -84,7 +84,8 @@ const UsersTable = () => {
 
     const {
         data: usersByRole,
-        isFetching: isLoadingUsersByRole
+        isFetching: isLoadingUsersByRole,
+        refetch: refetchUsersByRole
     } = useGetUsersByRoleQuery({
         roleId: selectedRoleId!,
         pageIndex,
@@ -93,7 +94,8 @@ const UsersTable = () => {
 
     const {
         data: userDetailsDynamic,
-        isFetching: isLoadingDynamic
+        isFetching: isLoadingDynamic,
+        refetch: refetchDynamicUsers
     } = useGetUsersDynamicQuery({
         pageIndex,
         pageSize,
@@ -218,6 +220,17 @@ const UsersTable = () => {
         }
     };
 
+    const handleRefresh = () => {
+        setPageIndex(0);
+        if (selectedRoleId) {
+            refetchUsersByRole();
+        } else if (searchText) {
+            refetchDynamicUsers();
+        } else {
+            refetch();
+        }
+    };
+
     const { useBreakpoint } = Grid;
     const screens = useBreakpoint();
 
@@ -254,6 +267,8 @@ const UsersTable = () => {
                             onRoleFilterChange={setSelectedRoleId}
                             selectedRoleId={selectedRoleId}
                             roles={rolesData?.items}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
                         />
                         <Table<UserInfo>
                             columns={columns}
