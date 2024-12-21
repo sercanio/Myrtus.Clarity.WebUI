@@ -1,29 +1,22 @@
 import { Input, Select, Space, Grid, Button } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
-import type { Role } from '@types/role';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
 
-interface UserSearchFiltersProps {
+interface AuditLogSearchFiltersProps {
     onSearchFieldChange: (value: string) => void;
     onSearchTextChange: (value: string) => void;
-    onRoleFilterChange: (roleId: string | undefined) => void;
-    selectedRoleId?: string;
-    roles?: Role[];
     onRefresh: () => void;
     isLoading: boolean;
 }
 
-export const UserSearchFilters = ({
+export const AuditLogSearchFilters = ({
     onSearchFieldChange,
     onSearchTextChange,
-    onRoleFilterChange,
-    selectedRoleId,
-    roles,
     onRefresh,
     isLoading
-}: UserSearchFiltersProps) => {
+}: AuditLogSearchFiltersProps) => {
     const screens = useBreakpoint();
 
     return (
@@ -34,16 +27,16 @@ export const UserSearchFilters = ({
         >
             <Input.Group compact style={{ display: 'flex', flexDirection: screens.xs ? 'column' : 'row', gap: '8px' }}>
                 <Select
-                    defaultValue="firstName"
+                    defaultValue="action"
                     style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
                     onChange={onSearchFieldChange}
                 >
-                    <Option value="firstName">First Name</Option>
-                    <Option value="lastName">Last Name</Option>
-                    <Option value="email">Email</Option>
+                    <Option value="user">User</Option>
+                    <Option value="action">Action</Option>
+                    <Option value="entity">Entity</Option>
                 </Select>
                 <Input
-                    placeholder="Search users..."
+                    placeholder="Search logs..."
                     prefix={<SearchOutlined />}
                     onChange={e => onSearchTextChange(e.target.value)}
                     style={{ width: screens.xs ? '100%' : 200 }}
@@ -59,19 +52,6 @@ export const UserSearchFilters = ({
                     Refresh
                 </Button>
             </Input.Group>
-            <Select
-                allowClear
-                style={{ width: screens.xs ? '100%' : 200 }}
-                placeholder="Filter by role"
-                onChange={onRoleFilterChange}
-                value={selectedRoleId}
-            >
-                {roles?.map(role => (
-                    <Select.Option key={role.id} value={role.id}>
-                        {role.name}
-                    </Select.Option>
-                ))}
-            </Select>
         </Space>
     );
 };
