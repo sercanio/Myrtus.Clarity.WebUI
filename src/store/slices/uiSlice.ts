@@ -34,17 +34,14 @@ const uiSlice = createSlice({
       state.notificationCount = action.payload;
     },
     setNotifications: (state, action: { payload: Notification[] }) => {
-      state.notifications = action.payload.map(notification => ({
-        ...notification,
-        isRead: true,
-      }));
+      state.notifications = action.payload;
+      state.notificationCount = state.notifications.filter(n => !n.isRead).length;
     },
     addNotification: (state, action: { payload: Notification }) => {
-      state.notifications.unshift({
-        ...action.payload,
-        isRead: false,
-      });
-      state.notificationCount += 1;
+      state.notifications.unshift(action.payload);
+      if (!action.payload.isRead) {
+        state.notificationCount += 1;
+      }
     },
     resetNotificationCount: (state) => {
       state.notificationCount = 0;

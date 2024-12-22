@@ -64,7 +64,7 @@ export const userApi = api.injectEndpoints({
       }),
       providesTags: ['Users'],
     }),
-    getNotifications: builder.query<PaginatedResponse<Notification>, { pageIndex: number; pageSize: number }>({
+    getNotifications: builder.query<NotificationResponse, { pageIndex: number; pageSize: number }>({
       query: ({ pageIndex, pageSize }) => ({
         url: 'notifications',
         params: {
@@ -74,8 +74,15 @@ export const userApi = api.injectEndpoints({
       }),
       providesTags: ['Notifications'],
     }),
+    markNotificationsRead: builder.mutation<void, void>({
+      query: () => ({
+        url: 'notifications/read',
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 }).enhanceEndpoints({
   addTagTypes: ['Users', 'AuditLogs', 'Notifications'],
 });
@@ -86,5 +93,6 @@ export const {
   useUpdateUserRoleMutation,
   useGetUsersDynamicQuery,
   useGetUsersByRoleQuery,
-  useGetNotificationsQuery
+  useGetNotificationsQuery,
+  useMarkNotificationsReadMutation
 } = userApi;

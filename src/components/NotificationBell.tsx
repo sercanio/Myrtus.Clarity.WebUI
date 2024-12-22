@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Badge, Dropdown, Flex, Typography, message, Pagination } from 'antd';
+import { Badge, Dropdown, Flex, Typography, message, Pagination, Spin } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { HubConnectionBuilder, LogLevel, HubConnection } from '@microsoft/signalr';
 import { useAppDispatch, useGetNotificationsQuery } from '@store/hooks';
-import { addNotification, resetNotificationCount, setNotifications, setNotificationCount } from '@store/slices/uiSlice';
+import { addNotification, setNotifications, markNotificationsAsRead, setNotificationCount } from '@store/slices/uiSlice';
 import type { Notification } from '@types/notification';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/index'; // Adjust the import path as necessary
 import { Link } from 'react-router-dom';
 import { useGetCurrentUserQuery } from '@store/services/accountApi';
+import { useMarkNotificationsReadMutation } from '@store/services/userApi';
 
 const NotificationBell: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -16,23 +17,23 @@ const NotificationBell: React.FC = () => {
   const notificationCount = useSelector((state: RootState) => state.ui.notificationCount);
   const authSlice = useSelector((state: RootState) => state.auth);
   const { data: userProfile } = useGetCurrentUserQuery();
-
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
-
   const { data: notificationsData, refetch } = useGetNotificationsQuery({
     pageIndex: currentPage - 1,
     pageSize
   });
   const [connection, setConnection] = useState<HubConnection | null>(null);
-
   const isInAppNotificationsEnabled = userProfile?.notificationPreference.isInAppNotificationEnabled;
 
   const [messageApi, contextHolder] = message.useMessage();
+  const [markNotificationsRead] = useMarkNotificationsReadMutation();
+  const [isMarkingRead, setIsMarkingRead] = useState(false);
 
   useEffect(() => {
     if (notificationsData && isInAppNotificationsEnabled) {
-      dispatch(setNotifications(notificationsData.items));
+      dispatch(setNotifications(notificationsData.paginatedNotifications.items));
+      dispatch(setNotificationCount(notificationsData.unreadCount));
     }
   }, [notificationsData, dispatch, isInAppNotificationsEnabled]);
 
@@ -77,15 +78,22 @@ const NotificationBell: React.FC = () => {
 
   const hasUnread = notifications.some(notification => !notification.isRead);
 
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (hasUnread) {
-      dispatch(resetNotificationCount());
+      setIsMarkingRead(true);
+      try {
+        await markNotificationsRead().unwrap();
+        await refetch();
+        dispatch(setNotifications(notificationsData?.items || []));
+      } finally {
+        setIsMarkingRead(false);
+      }
     }
   };
 
   const handlePageChange = (page: number, newPageSize?: number) => {
     setCurrentPage(page);
-    dispatch(resetNotificationCount());
     if (newPageSize && newPageSize !== pageSize) {
       setPageSize(newPageSize);
       setCurrentPage(1);
@@ -110,8 +118,14 @@ const NotificationBell: React.FC = () => {
                 color: hasUnread ? undefined : '#ccc',
                 cursor: hasUnread ? 'pointer' : 'not-allowed',
               }}
+              disabled={isMarkingRead}
             >
-              Mark all as read
+              {isMarkingRead ? 
+              <Flex align='center' gap='small'>
+                <Typography.Text>Marking as read...</Typography.Text>
+                <Spin size='small' spinning style={{ position: 'relative', margin: '0 2px' }} />
+              </Flex>
+               : <Typography.Text>Mark all as read</Typography.Text>}
             </Typography.Link>
           ),
         },
@@ -142,7 +156,7 @@ const NotificationBell: React.FC = () => {
               <Pagination
                 current={currentPage}
                 pageSize={pageSize}
-                total={notificationsData?.totalCount || 0}
+                total={notificationsData?.paginatedNotifications.totalCount || 0}
                 onChange={handlePageChange}
                 size="small"
               />
@@ -179,7 +193,7 @@ const NotificationBell: React.FC = () => {
       <Badge count={notificationCount} offset={[-1, 1]}>
         <Dropdown
           menu={notificationMenu}
-          trigger={['click']}
+          trigger={['hover']}
           onClick={handleBellClick}
         >
           <span>

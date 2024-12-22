@@ -9,7 +9,12 @@ export interface Notification {
 }
 
 export interface NotificationPreference {
-    inAppNotification: boolean;
-    emailNotification: boolean;
-    pushNotification: boolean;
+    isInAppNotificationEnabled: boolean;
+    isEmailNotificationEnabled: boolean;
+    isPushNotificationEnabled: boolean;
+}
+
+export interface NotificationResponse {
+  paginatedNotifications: PaginatedResponse<Notification>;
+  unreadCount: number;
 }

@@ -188,7 +188,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
               <NotificationBell />
               <Dropdown
                 menu={{ items: userMenuItems }}
-                trigger={['hover', 'click']}
+                trigger={['hover']}
                 placement="bottomLeft"
               >
                 <Avatar
