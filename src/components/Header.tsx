@@ -71,8 +71,9 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             account: {
               ...account,
               tenantProfiles: plainTenantProfiles,
-              firstName: userProfile?.firstName || '',
-              lastName: userProfile?.lastName || '',
+              firstName: userProfile?.firstName,
+              lastName: userProfile?.lastName,
+              email: userProfile?.email,
               roles: userProfile?.roles || [],
               notificationPreferences: userProfile?.notificationPreference,
               avatarUrl: userProfile?.avatarUrl || 'https://ui-avatars.com/api/?name=John+Doe&background=random&rounded=true&bold=true&size=128',
@@ -86,7 +87,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       }
     };
     acquireAndStoreToken();
-  }, [isAuthenticated, account, instance, dispatch, userProfile?.firstName, userProfile?.lastName, userProfile?.roles, userProfile?.notificationPreference, userProfile?.avatarUrl]);
+  }, [isAuthenticated, account, instance, dispatch, userProfile?.firstName, userProfile?.lastName, userProfile?.email, userProfile?.roles, userProfile?.notificationPreference, userProfile?.avatarUrl]);
 
   const handleLogin = async () => {
     try {
@@ -122,10 +123,10 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       label: (
         <div style={{ padding: '4px 0' }}>
           <Typography.Text strong>
-            {userProfile?.firstName.value} {userProfile?.lastName.value}
+            {userProfile?.firstName?.value} {userProfile?.lastName?.value}
           </Typography.Text>
           <br />
-          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>{userProfile?.email.value}</Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>{userProfile?.email?.value}</Typography.Text>
         </div>
       ),
       disabled: true,

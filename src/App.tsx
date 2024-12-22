@@ -74,8 +74,8 @@ function App() {
                 account: {
                   ...account,
                   tenantProfiles: plainTenantProfiles,
-                  firstName: userProfile?.firstName || '',
-                  lastName: userProfile?.lastName || '',
+                  firstName: userProfile?.firstName,
+                  lastName: userProfile?.lastName,
                   roles: userProfile?.roles || [],
                   notificationPreferences: userProfile?.notificationPreference,
                   avatarUrl: userProfile?.avatarUrl || 'https://ui-avatars.com/api/?name=John+Doe&background=random&rounded=true&bold=true&size=128',
