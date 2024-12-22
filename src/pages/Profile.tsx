@@ -47,7 +47,7 @@ const Profile: React.FC = () => {
     setPreferences({ ...preferences, [key]: checked });
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
     try {
@@ -64,8 +64,8 @@ const Profile: React.FC = () => {
     return <div>No user data available</div>;
   }
 
-  const firstName = user.firstName;
-  const lastName = user.lastName;
+  const firstName = user.firstName?.value;
+  const lastName = user.lastName?.value;
 
   return (
     <>
@@ -126,7 +126,7 @@ const Profile: React.FC = () => {
                   <Form.Item>
                     <Button
                       type="primary"
-                      onClick={() => handleSubmit}
+                      onClick={(event) => handleSubmit(event)}
                       disabled={!isDirty}
                       loading={isSubmitting}
                     >

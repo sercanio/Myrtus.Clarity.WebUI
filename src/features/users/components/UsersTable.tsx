@@ -171,11 +171,11 @@ const UsersTable = () => {
             title: 'Name',
             key: 'name',
             sorter: true,
-            render: (_, record) => `${record.firstName} ${record.lastName}`,
+            render: (_, record) => `${record.firstName.value} ${record.lastName.value}`,
         },
         {
             title: 'Email',
-            dataIndex: 'email',
+            dataIndex: ['email', 'value'],
             key: 'email',
             sorter: true,
         },

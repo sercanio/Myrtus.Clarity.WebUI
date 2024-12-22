@@ -1,12 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AccountInfo } from '@azure/msal-browser';
-import { UserInfo } from '@/types/user';
+import { UserInfo} from '@/types/user';
 import { NotificationPreference } from '@/types/notification';
+import { ValueObject } from '@srctypes/valueObject';
 
 interface ExtendedAccountInfo extends Omit<AccountInfo, 'tenantProfiles'> {
   tenantProfiles: Record<string, UserInfo>;
-  firstName?: string;
-  lastName?: string;
+  firstName?: ValueObject<string>;
+  lastName?: ValueObject<string>;
+  email?: ValueObject<string>;
   avatarUrl?: string;
   roles?: Array<{ name: string }>;
   notificationPreferences?: NotificationPreference

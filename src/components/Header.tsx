@@ -122,10 +122,10 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       label: (
         <div style={{ padding: '4px 0' }}>
           <Typography.Text strong>
-            {userProfile?.firstName} {userProfile?.lastName}
+            {userProfile?.firstName.value} {userProfile?.lastName.value}
           </Typography.Text>
           <br />
-          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>{userProfile?.email}</Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>{userProfile?.email.value}</Typography.Text>
         </div>
       ),
       disabled: true,
