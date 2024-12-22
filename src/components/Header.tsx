@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Badge, Menu, Flex, Spin } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Flex, Spin } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   UserOutlined,
@@ -20,6 +20,7 @@ import type { RootState } from '@store/index';
 import { useAppDispatch } from '@store/hooks';
 import NotificationBell from '@components/NotificationBell';
 import { useGetCurrentUserQuery } from '@store/services/accountApi' // Removed comma
+import { UserInfo } from '@/types/user';
 
 const { Header: AntHeader } = Layout;
 
@@ -34,7 +35,6 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const { isUserLoading } = useSelector((state: RootState) => state.ui);
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
@@ -59,14 +59,23 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             scopes: import.meta.env.VITE_AZURE_AD_B2C_SCOPES.split(' '),
             account: account,
           });
-          const plainTenantProfiles = account.tenantProfiles
-            ? Object.fromEntries(account.tenantProfiles)
+          const plainTenantProfiles: Record<string, UserInfo> = account.tenantProfiles
+            ? Object.fromEntries(
+              Object.entries(account.tenantProfiles).map(([key, profile]) => [
+                key, profile as UserInfo
+              ])
+            )
             : {};
 
           dispatch(loginSuccess({
             account: {
               ...account,
-              tenantProfiles: plainTenantProfiles
+              tenantProfiles: plainTenantProfiles,
+              firstName: userProfile?.firstName || '',
+              lastName: userProfile?.lastName || '',
+              roles: userProfile?.roles || [],
+              notificationPreferences: userProfile?.notificationPreference,
+              avatarUrl: userProfile?.avatarUrl || 'https://ui-avatars.com/api/?name=John+Doe&background=random&rounded=true&bold=true&size=128',
             },
             accessToken: response.accessToken
           }));
@@ -77,7 +86,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       }
     };
     acquireAndStoreToken();
-  }, [isAuthenticated, account, instance, dispatch]);
+  }, [isAuthenticated, account, instance, dispatch, userProfile?.firstName, userProfile?.lastName, userProfile?.roles, userProfile?.notificationPreference, userProfile?.avatarUrl]);
 
   const handleLogin = async () => {
     try {
@@ -195,10 +204,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
                   size="large"
                   src={user?.avatarUrl}
                   icon={<Spin size="small" />}
-                style={{
-                  cursor: 'pointer'
-                }}
-                />
+                  style={{ cursor: 'pointer' }} />
               </Dropdown>
             </>
           ) : (

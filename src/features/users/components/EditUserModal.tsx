@@ -1,11 +1,11 @@
 import { Modal, Button, Checkbox } from 'antd';
-import type { User } from '@types/user';
-import type { Role } from '@types/role';
+import type { UserInfo } from '@/types/user';
+import type { Role } from '@/types/role';
 
 interface EditUserModalProps {
     visible: boolean;
     onClose: () => void;
-    selectedUser: User | null;
+    selectedUser: UserInfo | null;
     roles: Role[];
     selectedRoles: Set<string>;
     onRoleChange: (roleId: string, checked: boolean) => Promise<void>;

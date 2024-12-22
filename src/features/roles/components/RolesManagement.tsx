@@ -1,8 +1,8 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Layout, Card, List, Checkbox, Typography, Space, message, theme, Button, Modal, Input, Popconfirm, Grid, Collapse, Tag, Spin } from 'antd';
+import { useState, useMemo, useEffect, useContext } from 'react';
+import { Layout, Card, List, Checkbox, Typography, Space, theme, Button, Modal, Input, Popconfirm, Grid, Collapse, Tag, Spin } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {  setLoading } from '@store/slices/uiSlice';
 import {
   useGetRolesQuery,
@@ -13,8 +13,9 @@ import {
   useDeleteRoleMutation,
   useUpdateRoleNameMutation
 } from '@store/services/roleApi';
-import { Role } from '@types/role';
-import { Permission } from '@types/permission';
+import { Role } from '@/types/role';
+import { Permission } from '@/types/permission';
+import { MessageContext } from '@contexts/MessageContext';
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
@@ -32,7 +33,7 @@ const RolesManagement = () => {
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
 
-  const [messageApi, contextHolder] = message.useMessage();
+  const messageApi = useContext(MessageContext);
 
   const { data: rolesData, isLoading: isLoadingRoles } = useGetRolesQuery({
     pageIndex: 0,
@@ -66,15 +67,18 @@ const RolesManagement = () => {
 
   const groupedPermissions = useMemo(() => {
     if (!permissionsData?.items) return {};
-
-    return permissionsData.items.reduce((acc: { [x: string]: Permission[]; }, permission: Permission) => {
+  
+    const items = permissionsData.items as unknown as Permission[];
+  
+    return items.reduce((acc: Record<string, Permission[]>, permission: Permission) => {
       if (!acc[permission.feature]) {
         acc[permission.feature] = [];
       }
       acc[permission.feature].push(permission);
       return acc;
-    }, {} as Record<string, typeof permissionsData.items>);
+    }, {});
   }, [permissionsData]);
+  
 
   const handlePermissionChange = async (permissionId: string, checked: boolean) => {
     if (!selectedRoleId) return;
@@ -86,26 +90,26 @@ const RolesManagement = () => {
         operation: checked ? 'Add' : 'Remove'
       }).unwrap();
 
-      messageApi.success(`Permission ${checked ? 'added to' : 'removed from'} role`);
+      messageApi?.success(`Permission ${checked ? 'added to' : 'removed from'} role`);
     } catch (error: any) {
       console.log({error});
-      messageApi.error(error.data?.errors || error.data?.detail || 'Failed to update permission');
+      messageApi?.error(error.data?.errors || error.data?.detail || 'Failed to update permission');
     }
   };
 
   const handleCreateRole = async () => {
     try {
       await createRole({ name: newRoleName }).unwrap();
-      messageApi.success('Role created successfully');
+      messageApi?.success('Role created successfully');
       setIsCreateModalOpen(false);
       setNewRoleName('');
     } catch (error: any) {
       if (error.data?.errors) {
         error.data.errors.forEach((errorMessage: string) => {
-          messageApi.error(errorMessage || 'Failed to create role');
+          messageApi?.error(errorMessage || 'Failed to create role');
         });
       } else {
-        messageApi.error('Failed to create role');
+        messageApi?.error('Failed to create role');
       }
     }
   };
@@ -113,17 +117,17 @@ const RolesManagement = () => {
   const handleDeleteRole = async (roleId: string) => {
     try {
       await deleteRole(roleId).unwrap();
-      messageApi.success('Role deleted successfully');
+      messageApi?.success('Role deleted successfully');
       if (selectedRoleId === roleId) {
         setSelectedRoleId(null);
       }
     } catch (error: any) {
       if (error.status === 403 && error.data?.errors) {
         error.data.errors.forEach((errorMessage: string) => {
-          messageApi.error(errorMessage || 'Failed to delete role');
+          messageApi?.error(errorMessage || 'Failed to delete role');
         });
       } else {
-        messageApi.error('Failed to delete role');
+        messageApi?.error('Failed to delete role');
       }
     }
   };
@@ -142,17 +146,16 @@ const RolesManagement = () => {
         name: editingRole.name,
       }).unwrap();
 
-      messageApi.success('Role name updated successfully');
+      messageApi?.success('Role name updated successfully');
       setIsEditNameModalOpen(false);
       setEditingRole(null);
     } catch (error: any) {
-      messageApi.error(error.data?.errors || 'Failed to update role name');
+      messageApi?.error(error.data?.errors || 'Failed to update role name');
     }
   };
 
   return (
     <>
-    {contextHolder}
       <Typography.Title level={2}>Roles Management</Typography.Title>
       <Layout style={{ background: 'inherit', flexDirection: screens.md ? 'row' : 'column' }}>
         <Sider width={screens.md ? 300 : '100%'} style={{ background: 'inherit', marginBottom: screens.md ? 0 : 16 }}>
@@ -243,7 +246,7 @@ const RolesManagement = () => {
                       {(permissions as Permission[]).map((permission: Permission) => (
                         <Checkbox
                           key={permission.id}
-                          checked={roleDetails?.permissions?.some((p) : {p : Permission} => p.id === permission.id)}
+                          checked={roleDetails?.permissions?.some((p) => p.id === permission.id)}
                           onChange={(e: CheckboxChangeEvent) =>
                             handlePermissionChange(permission.id, e.target.checked)
                           }

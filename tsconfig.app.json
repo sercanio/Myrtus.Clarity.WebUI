@@ -21,8 +21,9 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
+      "@src*": ["src/*"],
       "@components/*": ["src/components/*"],
-      "@types/*": ["src/types/*"],
+      "@/types/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"],
       "@hooks/*": ["src/hooks/*"],
       "@store/*": ["src/store/*"],
@@ -32,7 +33,7 @@
       "@services/*": ["src/services/*"],
       "@pages/*": ["src/pages/*"],
       "@config/*": ["src/config/*"],
+      "@contexts/*": ["src/contexts/*"],
     }
-  },
-  "include": ["src"],
+  }
 }

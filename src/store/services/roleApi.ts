@@ -1,7 +1,7 @@
 import { api } from '@store/api';
-import type { Role } from '@types/role';
-import type { RoleWithPermissions } from '@types/permission';
-import type { PaginatedResponse } from '@types/paginatedResponse';
+import type { Role } from '@/types/role';
+import type { RoleWithPermissions } from '@/types/role';
+import type { PaginatedResponse } from '@/types/paginatedResponse';
 
 
 export const roleApi = api.injectEndpoints({

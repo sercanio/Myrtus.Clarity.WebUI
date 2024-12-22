@@ -29,7 +29,7 @@ const baseQueryWithReauth: BaseQueryFn<
     console.error('API Error:', {
       status: result.error.status,
       data: result.error.data,
-      url: args.url,
+      url: args.toString(),
     });
   }
 
@@ -42,6 +42,6 @@ const baseQueryWithReauth: BaseQueryFn<
 
 export const api = createApi({
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Users', 'AuditLogs'],
+  tagTypes: ['Users', 'AuditLogs', 'Notifications', 'Roles', 'Permissions'],
   endpoints: () => ({}),
 });

@@ -1,12 +1,13 @@
 import { Card, Avatar, Flex } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useContext, useEffect } from 'react';
 import { useUpdateNotificationPreferencesMutation } from '@store/services/accountApi';
-import { Switch, Button, message } from 'antd';
+import { Switch, Button } from 'antd';
 import { useState } from 'react';
 import { Layout, Row, Col, Descriptions, Form, Typography } from 'antd';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/index';
+import { MessageContext } from '@contexts/MessageContext';
 
 const Profile: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -18,9 +19,9 @@ const Profile: React.FC = () => {
   });
 
   const initialPreferencesRef = useRef(preferences);
-  const [messageApi, contextHolder] = message.useMessage();
+  const messageApi = useContext(MessageContext);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user?.notificationPreferences) {
       const initialPrefs = {
         inAppNotification: user.notificationPreferences.isInAppNotificationEnabled,
@@ -46,13 +47,14 @@ const Profile: React.FC = () => {
     setPreferences({ ...preferences, [key]: checked });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsSubmitting(true);
     try {
       await updatePreferences(preferences).unwrap();
-      messageApi.success('Notification preferences updated successfully.');
+      messageApi?.success('Notification preferences updated successfully.');
     } catch {
-      messageApi.error('Failed to update notification preferences.');
+      messageApi?.error('Failed to update notification preferences.');
     } finally {
       setIsSubmitting(false);
     }
@@ -67,7 +69,6 @@ const Profile: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
       <Layout style={{ background: 'transparent', padding: 0 }}>
         <Layout.Content style={{ padding: 0, maxWidth: '1200px' }}>
           <Typography.Title level={2} style={{ textAlign: 'left' }}>Profile Management</Typography.Title>
@@ -125,7 +126,7 @@ const Profile: React.FC = () => {
                   <Form.Item>
                     <Button
                       type="primary"
-                      onClick={handleSubmit}
+                      onClick={() => handleSubmit}
                       disabled={!isDirty}
                       loading={isSubmitting}
                     >

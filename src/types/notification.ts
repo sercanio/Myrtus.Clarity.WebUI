@@ -1,3 +1,5 @@
+import { PaginatedResponse } from "./paginatedResponse";
+
 export interface Notification {
     id: string;
     action: string;

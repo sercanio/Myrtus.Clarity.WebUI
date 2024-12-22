@@ -1,8 +1,7 @@
-import {Grid, Typography } from "antd";
+import { Typography } from "antd";
 
 const Settings: React.FC = () => {
-  const screens = Grid.useBreakpoint();
-  
+
   return (
     <div>
       <Typography.Title level={2}>

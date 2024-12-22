@@ -1,6 +1,6 @@
 import { api } from '@store/api';
-import type { RegisterUser } from '@types/registerUser';
-import { UserInfo } from '@types/user';
+import type { RegisterUser } from '@/types/registerUser';
+import { UserInfo } from '@/types/user';
 
 
 export const accountApi = api.injectEndpoints({

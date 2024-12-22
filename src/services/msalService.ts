@@ -17,10 +17,6 @@ const msalConfig: Configuration = {
   system: {
     allowRedirectInIframe: true,
     loggerOptions: {
-      loggerCallback: (level, message) => {
-        // Implement your logging mechanism
-        // console.log(message);
-      },
       piiLoggingEnabled: false,
     },
   },

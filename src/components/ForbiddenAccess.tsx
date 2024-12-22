@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ForbiddenAccess = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, isUserLoading } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   return (
     <>

@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Table, Card, Pagination, Select, Grid, Input, Layout, Button } from 'antd';
+import { Table, Card, Pagination, Grid, Layout } from 'antd';
 import { useGetAuditLogsQuery, useGetAuditLogsDynamicQuery } from '@store/services/auditLogApi';
 import debounce from 'lodash/debounce';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import type { AuditLog } from '@types/auditLog';
+import type { AuditLog } from '@/types/auditLog';
 import FormattedDate from '@components/FormattedDate';
 import { AuditLogSearchFilters } from './AuditLogSearchFilters';
 import { useDispatch } from 'react-redux';

@@ -1,12 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState, useMemo, useEffect, useContext } from 'react';
+import { useDispatch } from 'react-redux';
 import { setLoading } from '@store/slices/uiSlice';
 import {
     Table,
     Card,
     Button,
     Tag,
-    message,
     Space,
     Form,
     Pagination,
@@ -27,11 +26,12 @@ import { useGetRolesQuery } from '@store/services/roleApi';
 import { useRegisterMutation } from '@store/services/accountApi';
 import { UserSearchFilters } from './UserSearchFilters';
 import { EditUserModal } from './EditUserModal';
-import { RegisterUser } from '@types/registerUser';
+import { RegisterUser } from '@/types/registerUser';
 import { RegisterUserModal } from './RegisterUserModal';
-import type { ErrorResponse } from '@types/errorResponse';
-import type { UserInfo } from '@types/user';
-import type { Role } from '@types/role';
+import type { ErrorResponse } from '@/types/errorResponse';
+import type { UserInfo } from '@/types/user';
+import type { Role } from '@/types/role';
+import { MessageContext } from '@contexts/MessageContext';
 
 const { Content } = Layout;
 
@@ -63,7 +63,7 @@ const UsersTable = () => {
     const [sortDirection, setSortDirection] = useState<string | null>(null);
     const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>();
 
-    const [messageApi, contextHolder] = message.useMessage();
+    const messageApi = useContext(MessageContext);
 
     interface FilterDescriptor {
         field: string;
@@ -160,9 +160,9 @@ const UsersTable = () => {
                 roles: updatedRoles.filter((role): role is Role => role !== undefined)
             });
 
-            messageApi.success(`Role ${checked ? 'added' : 'removed'} successfully`);
+            messageApi?.success(`Role ${checked ? 'added' : 'removed'} successfully`);
         } catch {
-            messageApi.error(`Failed to ${checked ? 'add' : 'remove'} role`);
+            messageApi?.error(`Failed to ${checked ? 'add' : 'remove'} role`);
         }
     };
 
@@ -206,7 +206,7 @@ const UsersTable = () => {
     const handleRegisterUser = async (values: RegisterUser) => {
         try {
             await registerUser(values).unwrap();
-            messageApi.success('User registered successfully');
+            messageApi?.success('User registered successfully');
             setRegisterUserModalVisible(false);
             form.resetFields();
             refetch();
@@ -216,7 +216,7 @@ const UsersTable = () => {
                 || (error as ErrorResponse).data?.errors?.join(', ')
                 || 'Failed to register user';
 
-            messageApi.error(errorMessage);
+            messageApi?.error(errorMessage);
         }
     };
 
@@ -236,7 +236,6 @@ const UsersTable = () => {
 
     return (
         <>
-            {contextHolder}
             <Layout style={{ background: 'inherit', padding: 0 }}>
                 <Content style={{ padding: 0, width: '100%' }}>
                     <Typography.Title level={2}>Users Management</Typography.Title>

@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Badge, Dropdown, Flex, Typography, message, Pagination, Spin } from 'antd';
+import React, { useEffect, useState, useContext } from 'react';
+import { Badge, Dropdown, Flex, Typography, Pagination, Spin } from 'antd';
 import { BellOutlined } from '@ant-design/icons';
 import { HubConnectionBuilder, LogLevel, HubConnection } from '@microsoft/signalr';
 import { useAppDispatch, useGetNotificationsQuery } from '@store/hooks';
-import { addNotification, setNotifications, markNotificationsAsRead, setNotificationCount } from '@store/slices/uiSlice';
-import type { Notification } from '@types/notification';
+import { addNotification, setNotifications, setNotificationCount } from '@store/slices/uiSlice';
+import type { Notification } from '@/types/notification';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/index'; // Adjust the import path as necessary
 import { Link } from 'react-router-dom';
 import { useGetCurrentUserQuery } from '@store/services/accountApi';
 import { useMarkNotificationsReadMutation } from '@store/services/userApi';
+import { MessageContext } from '@contexts/MessageContext';
 
 const NotificationBell: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -26,7 +27,7 @@ const NotificationBell: React.FC = () => {
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const isInAppNotificationsEnabled = userProfile?.notificationPreference.isInAppNotificationEnabled;
 
-  const [messageApi, contextHolder] = message.useMessage();
+  const messageApi = useContext(MessageContext);
   const [markNotificationsRead] = useMarkNotificationsReadMutation();
   const [isMarkingRead, setIsMarkingRead] = useState(false);
 
@@ -58,7 +59,7 @@ const NotificationBell: React.FC = () => {
           console.log('Notification SignalR Connected!');
           connection.on('ReceiveNotification', (notification: Notification) => {
             dispatch(addNotification(notification));
-            messageApi.info(`${notification.details}`);
+            messageApi?.info(`${notification.details}`);
           });
         })
         .catch(err => {
@@ -85,7 +86,7 @@ const NotificationBell: React.FC = () => {
       try {
         await markNotificationsRead().unwrap();
         await refetch();
-        dispatch(setNotifications(notificationsData?.items || []));
+        dispatch(setNotifications(notificationsData?.paginatedNotifications.items || []));
       } finally {
         setIsMarkingRead(false);
       }
@@ -120,12 +121,12 @@ const NotificationBell: React.FC = () => {
               }}
               disabled={isMarkingRead}
             >
-              {isMarkingRead ? 
-              <Flex align='center' gap='small'>
-                <Typography.Text>Marking as read...</Typography.Text>
-                <Spin size='small' spinning style={{ position: 'relative', margin: '0 2px' }} />
-              </Flex>
-               : <Typography.Text>Mark all as read</Typography.Text>}
+              {isMarkingRead ?
+                <Flex align='center' gap='small'>
+                  <Typography.Text>Marking as read...</Typography.Text>
+                  <Spin size='small' spinning style={{ position: 'relative', margin: '0 2px' }} />
+                </Flex>
+                : <Typography.Text>Mark all as read</Typography.Text>}
             </Typography.Link>
           ),
         },
@@ -189,12 +190,11 @@ const NotificationBell: React.FC = () => {
 
   return (
     <>
-      {contextHolder}
       <Badge count={notificationCount} offset={[-1, 1]}>
         <Dropdown
           menu={notificationMenu}
           trigger={['hover']}
-          onClick={handleBellClick}
+          onVisibleChange={(visible) => visible && handleBellClick()}
         >
           <span>
             <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
