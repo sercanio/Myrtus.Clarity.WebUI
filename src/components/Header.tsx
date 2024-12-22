@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Badge, Menu, Flex } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Badge, Menu, Flex, Spin } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   UserOutlined,
@@ -34,13 +34,14 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const { isUserLoading } = useSelector((state: RootState) => state.ui);
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
   const { data: userProfile } = useGetCurrentUserQuery(undefined, {
     skip: !isAuthenticated,
   });
-  
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -62,12 +63,12 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             ? Object.fromEntries(account.tenantProfiles)
             : {};
 
-          dispatch(loginSuccess({ 
-            account: { 
-              ...account, 
-              tenantProfiles: plainTenantProfiles 
-            }, 
-            accessToken: response.accessToken 
+          dispatch(loginSuccess({
+            account: {
+              ...account,
+              tenantProfiles: plainTenantProfiles
+            },
+            accessToken: response.accessToken
           }));
         } catch (error: any) {
           console.error('Token acquisition error in Header.tsx:', error);
@@ -193,11 +194,10 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
                 <Avatar
                   size="large"
                   src={user?.avatarUrl}
-                  icon={!user?.avatarUrl && <UserOutlined />}
-                  style={{
-                    backgroundColor: '#1890ff',
-                    cursor: 'pointer'
-                  }}
+                  icon={<Spin size="small" />}
+                style={{
+                  cursor: 'pointer'
+                }}
                 />
               </Dropdown>
             </>

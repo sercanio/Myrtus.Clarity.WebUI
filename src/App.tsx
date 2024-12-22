@@ -27,7 +27,7 @@ function App() {
   const { accounts } = useMsal();
   const dispatch = useAppDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-  const { data: userProfile, isLoading, error } = useGetCurrentUserQuery(undefined, {
+  const { data: userProfile } = useGetCurrentUserQuery(undefined, {
     skip: !isAuthenticated
   });
 
