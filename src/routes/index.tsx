@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, RouteObject } from 'react-router-dom';
 import Users from '@pages/Users';
 import Roles from '@pages/Roles';
 import Settings from '@pages/Settings';
@@ -10,8 +10,8 @@ import type { RootState } from '@store/index';
 import AuditLogs from '@pages/AuditLogs';
 import Home from '@pages/Home';
 import Landing from '@pages/Landing';
+import loadedModules from '@src/modules/modulesLoader';
 
-// Define role constants
 const ROLES = {
   ADMIN: 'Admin',
   EDITOR: 'Editor',
@@ -21,65 +21,67 @@ const ROLES = {
 function AppRoutes() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
+
+  const staticRoutes: RouteObject[] = [
+    {
+      path: '/',
+      element: isAuthenticated ? <Home /> : <Landing />,
+    },
+    {
+      path: '/auth/callback',
+      element: <AuthCallback />,
+    },
+    {
+      path: '/users',
+      element: (
+        <ProtectedRoute requiredRoles={[ROLES.ADMIN, ROLES.REGISTERED]}>
+          <Users />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/roles',
+      element: (
+        <ProtectedRoute requiredRoles={[ROLES.ADMIN, ROLES.REGISTERED]}>
+          <Roles />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/settings',
+      element: (
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/profile',
+      element: (
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/audit-logs',
+      element: (
+        <ProtectedRoute requiredRoles={[ROLES.ADMIN]}>
+          <AuditLogs />
+        </ProtectedRoute>
+      ),
+    },
+  ];
+
+  const moduleRoutes = loadedModules.flatMap((mod) => mod.routes);
+
+  const appRoutes = [...staticRoutes, ...moduleRoutes];
+
   return (
     <Routes>
-      <Route 
-        path="/" 
-        element={
-          isAuthenticated ? (
-            <Home />
-          ) : (
-            <Landing />
-          )
-        } 
-      />
-      
-      <Route path="/auth/callback" element={<AuthCallback />} />
-      
-      <Route 
-        path="/users" 
-        element={
-          <ProtectedRoute requiredRoles={[ROLES.ADMIN, ROLES.REGISTERED]}>
-            <Users />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/roles" 
-        element={
-          <ProtectedRoute requiredRoles={[ROLES.ADMIN, ROLES.REGISTERED]}>
-            <Roles />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/settings" 
-        element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/profile" 
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } 
-      />
-
-      <Route 
-        path="/audit-logs" 
-        element={
-          <ProtectedRoute requiredRoles={[ROLES.ADMIN]}>
-            <AuditLogs />
-          </ProtectedRoute>
-        } 
-      />
+      {appRoutes.map((route, i) => (
+        <Route key={i} path={route.path} element={route.element} />
+      ))}
     </Routes>
   );
 }

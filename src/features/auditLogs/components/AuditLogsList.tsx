@@ -69,10 +69,8 @@ const AuditLogsList: React.FC = () => {
     const debouncedSearch = useMemo(
         () => debounce((value: string) => {
             setSearchText(value);
-            // Reset to first page when search is cleared
             if (!value) {
                 setPageIndex(0);
-                // Ensure we're using the normal query by resetting sort state
                 setHasUserSorted(false);
                 setSortField(null);
                 setSortDirection(null);
