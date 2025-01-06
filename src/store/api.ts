@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { BaseQueryFn, FetchArgs } from '@reduxjs/toolkit/query';
-// import { logout } from '@store/slices/authSlice';
 import type { RootState } from '@store/index';
 import { logoutUser } from '@services/msalService';
 
@@ -23,7 +22,7 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions);
+  const result = await baseQuery(args, api, extraOptions);
 
   if (result.error) {
     console.error('API Error:', {

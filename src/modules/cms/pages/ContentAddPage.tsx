@@ -27,6 +27,7 @@ const ContentAddPage: React.FC = () => {
   const [slugError, setSlugError] = useState<string | null>(null);
   const [contentStyle , setContentStyle] = useState<string | null>(null);
   const [mediaLibraryVisible, setMediaLibraryVisible] = useState(false);
+  const [activeTabKey, setActiveTabKey] = useState('1');
 
   const { token } = theme.useToken();
   const generateSlug = async (title: string) => {
@@ -65,9 +66,10 @@ const ContentAddPage: React.FC = () => {
     setBody(content);
   };
 
-  const handleMediaSelect = (url: string) => {
-    setBody((prevBody) => `${prevBody}<img src="${url}" alt="media" />`);
+  const handleMediaSelect = (url: string, alt: string) => {
+    setBody((prevBody) => `${prevBody}<img src="${url}" alt="${alt}" width="500" height="auto" />`);
     setMediaLibraryVisible(false);
+    setActiveTabKey('3'); // Switch to the "Content" tab
   };
 
   const handleSubmit = async () => {
@@ -112,7 +114,7 @@ const ContentAddPage: React.FC = () => {
         layout="vertical"
         onFinish={handleSubmit}
       >
-        <Tabs defaultActiveKey="1" style={{ height: '100%' }}>
+        <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} defaultActiveKey="1" style={{ height: '100%' }}>
           <TabPane tab="Basic Info" key="1">
             <Row gutter={16}>
               <Col xs={24} md={12}>
@@ -294,7 +296,7 @@ const ContentAddPage: React.FC = () => {
               visible={mediaLibraryVisible}
               onCancel={() => setMediaLibraryVisible(false)}
               footer={null}
-              width={800}
+              width={1200}
             >
               <MediaLibrary onSelect={handleMediaSelect} />
             </Modal>
