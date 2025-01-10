@@ -107,107 +107,106 @@ export function addCmsEndpoints() {
 
     extendedApi = baseApi.injectEndpoints({
       endpoints: (builder) => ({
-      getContentById: builder.query<Content, string>({
-        query: (id) => `content/${id}`,
-        providesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
-      }),
-
-      getAllContents: builder.query<PaginatedResponse<Content>, { pageIndex: number; pageSize: number }>({
-        query: ({ pageIndex, pageSize }) => ({
-        url: 'content',
-        params: { pageIndex, pageSize },
+        getContentById: builder.query<Content, string>({
+          query: (id) => `content/${id}`,
+          providesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
         }),
-        providesTags: ['Contents'],
-      }),
 
-      getAllContentsDynamic: builder.query<PaginatedResponse<Content>, DynamicContentQueryArgs>({
-        query: ({ pageIndex, pageSize, requestBody }) => ({
-          url: `content/dynamic?pageIndex=${pageIndex}&pageSize=${pageSize}`,
-          method: 'POST',
-          body: requestBody,
+        getAllContents: builder.query<PaginatedResponse<Content>, { pageIndex: number; pageSize: number }>({
+          query: ({ pageIndex, pageSize }) => ({
+            url: 'content',
+            params: { pageIndex, pageSize },
+          }),
+          providesTags: ['Contents'],
         }),
-        providesTags: ['Contents'],
-      }),
 
-      createContent: builder.mutation<Content, ContentDto>({
-        query: (content) => ({
-        url: 'content',
-        method: 'POST',
-        body: content,
+        getAllContentsDynamic: builder.query<PaginatedResponse<Content>, DynamicContentQueryArgs>({
+          query: ({ pageIndex, pageSize, requestBody }) => ({
+            url: `content/dynamic?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+            method: 'POST',
+            body: requestBody,
+          }),
+          providesTags: ['Contents'],
         }),
-        invalidatesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
-      }),
 
-      updateContent: builder.mutation<void, { id: string; content: ContentDto }>({
-        query: ({ id, content }) => ({
-        url: `content/${id}`,
-        method: 'PUT',
-        body: content,
+        createContent: builder.mutation<Content, ContentDto>({
+          query: (content) => ({
+            url: 'content',
+            method: 'POST',
+            body: content,
+          }),
+          invalidatesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
         }),
-        invalidatesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
-      }),
 
-      deleteContent: builder.mutation<void, string>({
-        query: (id) => ({
-        url: `content/${id}`,
-        method: 'DELETE',
+        updateContent: builder.mutation<void, { id: string; content: ContentDto }>({
+          query: ({ id, content }) => ({
+            url: `content/${id}`,
+            method: 'PUT',
+            body: content,
+          }),
+          invalidatesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
         }),
-        invalidatesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
-      }),
 
-      restoreContentVersion: builder.mutation<void, { id: string; versionNumber: number }>({
-        query: ({ id, versionNumber }) => ({
-        url: `content/${id}/restore/${versionNumber}`,
-        method: 'POST',
+        deleteContent: builder.mutation<void, string>({
+          query: (id) => ({
+            url: `content/${id}`,
+            method: 'DELETE',
+          }),
+          invalidatesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
         }),
-        invalidatesTags: ['Contents'],
-      }),
 
-      checkSlug: builder.mutation<{ exists: boolean }, { slug: string }>({
-        query: (slug) => ({
-        url: `content/slug/exists/${slug}`,
-        method: 'GET',
+        restoreContentVersion: builder.mutation<void, { id: string; versionNumber: number }>({
+          query: ({ id, versionNumber }) => ({
+            url: `content/${id}/restore/${versionNumber}`,
+            method: 'POST',
+          }),
+          invalidatesTags: ['Contents'],
         }),
-        invalidatesTags: ['Contents'],
-      }),
 
-      getAllMedia: builder.query<PaginatedResponse<Media>, { pageIndex: number; pageSize: number }>({
-        query: ({ pageIndex, pageSize }) => ({
-        url: 'media',
-        params: { pageIndex, pageSize },
+        checkSlug: builder.mutation<{ exists: boolean }, { slug: string }>({
+          query: (slug) => ({
+            url: `content/slug/exists/${slug}`,
+            method: 'GET',
+          }),
+          invalidatesTags: ['Contents'],
         }),
-        providesTags: ['Media'],
-      }),
 
-      getAllMediaDynamic: builder.query<PaginatedResponse<Media>, DynamicMediaQueryArgs>({
-        query: ({ pageIndex, pageSize, requestBody }) => ({
-          url: `media/dynamic?pageIndex=${pageIndex}&pageSize=${pageSize}`,
-          method: 'POST',
-          body: requestBody,
+        getAllMedia: builder.query<PaginatedResponse<Media>, { pageIndex: number; pageSize: number }>({
+          query: ({ pageIndex, pageSize }) => ({
+            url: 'media',
+            params: { pageIndex, pageSize },
+          }),
+          providesTags: ['Media'],
         }),
-        providesTags: ['Media'],
-      }),
 
-      uploadMedia: builder.mutation<string, FormData>({
-        query: (formData) => ({
-        url: 'media/upload',
-        method: 'POST',
-        body: formData,
+        getAllMediaDynamic: builder.query<PaginatedResponse<Media>, DynamicMediaQueryArgs>({
+          query: ({ pageIndex, pageSize, requestBody }) => ({
+            url: `media/dynamic?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+            method: 'POST',
+            body: requestBody,
+          }),
+          providesTags: ['Media'],
         }),
-        invalidatesTags: ['Media'],
-      }),
 
-      deleteMedia: builder.mutation<void, string>({
-        query: (id) => ({
-        url: `media/${id}`,
-        method: 'DELETE',
+        uploadMedia: builder.mutation<string, FormData>({
+          query: (formData) => ({
+            url: 'media/upload',
+            method: 'POST',
+            body: formData,
+          }),
+          invalidatesTags: ['Media'],
         }),
-        invalidatesTags: ['Media'],
-      }),
+
+        deleteMedia: builder.mutation<void, string>({
+          query: (id) => ({
+            url: `media/${id}`,
+            method: 'DELETE',
+          }),
+          invalidatesTags: ['Media'],
+        }),
       }),
       overrideExisting: false,
     });
-    
   }
 
   return extendedApi;

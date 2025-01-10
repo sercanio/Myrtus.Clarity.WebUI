@@ -36,17 +36,17 @@ export const userApi = api.injectEndpoints({
       invalidatesTags: ['Users'],
     }),
     getUsersDynamic: builder.query<PaginatedResponse<UserInfo>, DynamicQuery>({
-      query: (params) => ({
-        url: 'users/dynamic',
+      query: ({ pageIndex, pageSize, sort, filter }) => ({
+        url: `users/dynamic`,
         method: 'POST',
         params: {
-          pageIndex: params.pageIndex,
-          pageSize: params.pageSize
+          pageIndex,
+          pageSize,
         },
         body: {
-          sort: params.sort,
-          filter: params.filter
-        }
+          sort,
+          filter,
+        },
       }),
       providesTags: ['Users'],
     }),
