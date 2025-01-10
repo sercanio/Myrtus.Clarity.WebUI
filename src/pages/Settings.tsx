@@ -1,10 +1,15 @@
-function Settings() {
+import { Typography } from "antd";
+
+const Settings: React.FC = () => {
+
   return (
     <div>
-      <h1>Settings</h1>
+      <Typography.Title level={2}>
+        Settings
+      </Typography.Title>
       {/* Add your settings content here */}
     </div>
   );
 }
 
-export default Settings; 
+export default Settings;

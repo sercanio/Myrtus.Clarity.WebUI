@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Select, message, Grid, Card } from 'antd';
-import Title from 'antd/es/typography/Title';
+import { Table, Select, message, Grid, Card, Layout } from 'antd';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import type { ColumnsType } from 'antd/es/table';
-import FormattedDate from '../components/FormattedDate';
+import FormattedDate from '@components/FormattedDate';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
+const { Content } = Layout;
 
 interface Log {
     Id: string;
@@ -64,7 +64,7 @@ const ActivityMonitor: React.FC = () => {
 
         connection.start()
             .then(() => {
-                console.log('SignalR Connected!');
+                console.log('AuditLog SignalR Connected!');
             })
             .catch(err => {
                 console.error('SignalR Connection Error: ', err);
@@ -85,35 +85,39 @@ const ActivityMonitor: React.FC = () => {
     }, [logSize]);
 
     return (
-        <Card
-            title="Realtime Activity Monitor"
-            style={{
-                margin: screens.xs ? '2px 0px' : '2px 16px',
-                padding: screens.xs ? '4px 0px' : '4px',
-            }}
-            bodyStyle={{
-                padding: screens.xs ? '4px' : '16px',
-            }}
-            headStyle={{
-                padding: screens.xs ? '4px 6px' : '4px',
-            }}
-        >
-            <div style={{ padding: screens.xs ? '8px' : '16px' }}>
-                <Select
-                    defaultValue={10}
-                    style={{ width: screens.xs ? '100%' : 120, margin: '16px 0' }}
-                    onChange={(value) => setLogSize(value)}
+        <Layout style={{ background: 'transparent', padding: 0 }}>
+            <Content style={{ padding: 0, width: '100%' }}>
+                <Card
+                    title="Realtime Activity Monitor"
+                    style={{
+                        margin: screens.xs ? '2px 0px' : '2px 16px',
+                        padding: screens.xs ? '4px 0px' : '4px',
+                    }}
+                    bodyStyle={{
+                        padding: screens.xs ? '4px' : '16px',
+                    }}
+                    headStyle={{
+                        padding: screens.xs ? '4px 6px' : '4px',
+                    }}
                 >
-                    <Option value={10}>10 logs</Option>
-                    <Option value={20}>20 logs</Option>
-                    <Option value={50}>50 logs</Option>
-                    <Option value={100}>100 logs</Option>
-                </Select>
-                <div style={{ overflowX: 'auto' }}>
-                    <Table columns={columns} dataSource={logs} pagination={false} rowKey="Id" />
-                </div>
-            </div>
-        </Card>
+                    <div style={{ padding: screens.xs ? '8px' : '16px' }}>
+                        <Select
+                            defaultValue={10}
+                            style={{ width: screens.xs ? '100%' : 120, margin: '16px 0' }}
+                            onChange={(value) => setLogSize(value)}
+                        >
+                            <Option value={10}>10 logs</Option>
+                            <Option value={20}>20 logs</Option>
+                            <Option value={50}>50 logs</Option>
+                            <Option value={100}>100 logs</Option>
+                        </Select>
+                        <div style={{ overflowX: 'auto' }}>
+                            <Table columns={columns} dataSource={logs} pagination={false} rowKey="Id" />
+                        </div>
+                    </div>
+                </Card>
+            </Content>
+        </Layout>
     );
 };
 

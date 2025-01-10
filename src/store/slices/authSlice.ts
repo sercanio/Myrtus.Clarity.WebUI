@@ -1,96 +1,57 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { ApiService } from '../../services/api';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { AccountInfo } from '@azure/msal-browser';
+import { UserInfo} from '@/types/user';
+import { NotificationPreference } from '@/types/notification';
+import { ValueObject } from '@srctypes/valueObject';
 
-interface UserInfo {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  roles: string[];
+interface ExtendedAccountInfo extends Omit<AccountInfo, 'tenantProfiles'> {
+  tenantProfiles: Record<string, UserInfo>;
+  firstName?: ValueObject<string>;
+  lastName?: ValueObject<string>;
+  email?: ValueObject<string>;
   avatarUrl?: string;
+  roles?: Array<{ name: string }>;
+  notificationPreferences?: NotificationPreference
 }
 
 interface AuthState {
   isAuthenticated: boolean;
+  user: ExtendedAccountInfo | null;
   accessToken: string | null;
-  refreshToken: string | null;
-  userProfile: UserInfo | null;
-  loading: boolean;
   error: string | null;
-  idToken: string | null;
 }
 
-const initialState: AuthState = {
-  isAuthenticated: !!localStorage.getItem('access_token'),
-  accessToken: localStorage.getItem('access_token'),
-  refreshToken: localStorage.getItem('refresh_token'),
-  userProfile: localStorage.getItem('user_profile') 
-    ? JSON.parse(localStorage.getItem('user_profile')!) 
-    : null,
-  loading: false,
+const initialState: AuthState = { 
+  isAuthenticated: false,
+  user: null,
+  accessToken: null,
   error: null,
-  idToken: localStorage.getItem('id_token'),
 };
-
-export const fetchUserProfile = createAsyncThunk(
-  'auth/fetchUserProfile',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await ApiService.getCurrentUser();
-      return response;
-    } catch (error) {
-      return rejectWithValue((error as Error).message);
-    }
-  }
-);
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAzureAuthTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string; idToken: string }>) => {
+    loginSuccess: (state, action: PayloadAction<{ account: AuthState['user']; accessToken: string }>) => {
+      state.isAuthenticated = true;
+      state.user = action.payload.account;
       state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
-      state.idToken = action.payload.idToken;
-      state.isAuthenticated = !!action.payload.idToken;
-      localStorage.setItem('id_token', action.payload.idToken);
-      if (action.payload.accessToken) {
-        localStorage.setItem('access_token', action.payload.accessToken);
-      }
-      if (action.payload.refreshToken) {
-        localStorage.setItem('refresh_token', action.payload.refreshToken);
-      }
     },
-    logout: (state) => {
+    loginFailure: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
+    },
+    logoutFailure: (state) => {
       state.isAuthenticated = false;
+      state.user = null;
       state.accessToken = null;
-      state.refreshToken = null;
-      state.userProfile = null;
-      state.error = null;
-      state.idToken = null;
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_profile');
-      localStorage.removeItem('id_token');
+      state.error = 'Failed to retrieve user account.';
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchUserProfile.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.userProfile = action.payload;
-        localStorage.setItem('user_profile', JSON.stringify(action.payload));
-      })
-      .addCase(fetchUserProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
   },
 });
 
-export const { setAuthTokens, setAzureAuthTokens, logout } = authSlice.actions;
+export const { 
+  loginSuccess, 
+  loginFailure, 
+  logoutFailure,
+} = authSlice.actions;
 export default authSlice.reducer;

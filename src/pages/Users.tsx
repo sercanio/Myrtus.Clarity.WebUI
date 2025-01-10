@@ -1,16 +1,6 @@
-import UsersTable from '../features/users/components/UsersTable';
-import { Grid } from 'antd';
+import React from 'react';
+import UsersTable from '@features/users/components/UsersTable';
 
-const { useBreakpoint } = Grid;
-
-const Users = () => {
-  const screens = useBreakpoint();
-
-  return (
-    <div style={{ padding: screens.xs ? '8px' : '16px' }}>
-      <UsersTable />
-    </div>
-  );
-};
+const Users: React.FC = () => <UsersTable />
 
 export default Users;

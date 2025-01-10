@@ -9,6 +9,57 @@ html, body, #root {
   height: 100%;
 }
 
+blockquote, body, dd, dl, dt, fieldset, form, h1, h2, h3, h4, h5, h6, input, legend, ol, p, pre, select, td, textarea, th, ul {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f4f4f4;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+input, textarea {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  color: #333;
+}
+
+/* blockquete styles with antdesign */
+blockquote {
+  border-left: 4px solid #1890ff;
+  padding: 0 15px;
+  margin: 0;
+  margin-bottom: 20px;
+}
+
+blockquote p {
+  display: inline;
+}
+
 /* style scrollbars*/
 ::-webkit-scrollbar {
   width: 10px;

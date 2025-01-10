@@ -1,23 +1,47 @@
-import { useState, useMemo } from 'react';
-import { Table, Card, Button, Tag, message, Space, Form, Pagination, Grid, Select } from 'antd';
+import { useState, useMemo, useEffect, useContext } from 'react';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '@store/slices/uiSlice';
+import {
+    Table,
+    Card,
+    Button,
+    Tag,
+    Space,
+    Form,
+    Pagination,
+    Grid,
+    Layout,
+    Typography
+} from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import debounce from 'lodash/debounce';
-import { useGetUsersQuery, useGetUserDetailsQuery, useUpdateUserRoleMutation, useGetUsersDynamicQuery, useGetUsersByRoleQuery } from '../../../store/services/userApi';
-import { useGetRolesQuery } from '../../../store/services/roleApi';
-import type { Role, User } from '../../../types/user';
-import { useRegisterMutation } from '../../../store/services/accountApi';
-import { RegisterUser } from '../../../types/registerUser';
+import {
+    useGetUsersQuery,
+    useGetUserDetailsQuery,
+    useUpdateUserRoleMutation,
+    useGetUsersDynamicQuery,
+    useGetUsersByRoleQuery
+} from '@store/services/userApi';
+import { useGetRolesQuery } from '@store/services/roleApi';
+import { useRegisterMutation } from '@store/services/accountApi';
 import { UserSearchFilters } from './UserSearchFilters';
 import { EditUserModal } from './EditUserModal';
+import { RegisterUser } from '@/types/registerUser';
 import { RegisterUserModal } from './RegisterUserModal';
-import type { ErrorResponse } from '../../../types/errorResponse';
+import type { ErrorResponse } from '@/types/errorResponse';
+import type { UserInfo } from '@/types/user';
+import type { Role } from '@/types/role';
+import { MessageContext } from '@contexts/MessageContext';
+
+const { Content } = Layout;
 
 const UsersTable = () => {
+    const dispatch = useDispatch();
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [registerUserModalVisible, setRegisterUserModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
     const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
     const [, setHasChanges] = useState(false);
     const [registerUser] = useRegisterMutation();
@@ -39,6 +63,8 @@ const UsersTable = () => {
     const [sortDirection, setSortDirection] = useState<string | null>(null);
     const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>();
 
+    const messageApi = useContext(MessageContext);
+
     interface FilterDescriptor {
         field: string;
         operator: string;
@@ -58,7 +84,8 @@ const UsersTable = () => {
 
     const {
         data: usersByRole,
-        isFetching: isLoadingUsersByRole
+        isFetching: isLoadingUsersByRole,
+        refetch: refetchUsersByRole
     } = useGetUsersByRoleQuery({
         roleId: selectedRoleId!,
         pageIndex,
@@ -67,7 +94,8 @@ const UsersTable = () => {
 
     const {
         data: userDetailsDynamic,
-        isFetching: isLoadingDynamic
+        isFetching: isLoadingDynamic,
+        refetch: refetchDynamicUsers
     } = useGetUsersDynamicQuery({
         pageIndex,
         pageSize,
@@ -78,6 +106,10 @@ const UsersTable = () => {
     const userData = selectedRoleId ? usersByRole : userDetailsDynamic;
     const isLoading = selectedRoleId ? isLoadingUsersByRole : isLoadingDynamic;
 
+    useEffect(() => {
+        dispatch(setLoading(isLoading));
+    }, [isLoading, dispatch]);
+
     const debouncedSearch = useMemo(
         () => debounce((value: string) => {
             setSearchText(value);
@@ -85,7 +117,7 @@ const UsersTable = () => {
         []
     );
 
-    const handleTableChange: TableProps<User>['onChange'] = (_pagination, _filters, sorter) => {
+    const handleTableChange: TableProps<UserInfo>['onChange'] = (_pagination, _filters, sorter) => {
         if ('field' in sorter && 'order' in sorter) {
             setSortField(sorter.field as string);
             setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
@@ -95,7 +127,7 @@ const UsersTable = () => {
         }
     };
 
-    const handleEditClick = (user: User) => {
+    const handleEditClick = (user: UserInfo) => {
         setSelectedUser(user);
         setSelectedRoles(new Set(user.roles.map(role => role.id)));
         setHasChanges(false);
@@ -128,22 +160,22 @@ const UsersTable = () => {
                 roles: updatedRoles.filter((role): role is Role => role !== undefined)
             });
 
-            message.success(`Role ${checked ? 'added' : 'removed'} successfully`);
+            messageApi?.success(`Role ${checked ? 'added' : 'removed'} successfully`);
         } catch {
-            message.error(`Failed to ${checked ? 'add' : 'remove'} role`);
+            messageApi?.error(`Failed to ${checked ? 'add' : 'remove'} role`);
         }
     };
 
-    const columns: ColumnsType<User> = [
+    const columns: ColumnsType<UserInfo> = [
         {
             title: 'Name',
             key: 'name',
             sorter: true,
-            render: (_, record) => `${record.firstName} ${record.lastName}`,
+            render: (_, record) => `${record.firstName.value} ${record.lastName.value}`,
         },
         {
             title: 'Email',
-            dataIndex: 'email',
+            dataIndex: ['email', 'value'],
             key: 'email',
             sorter: true,
         },
@@ -174,7 +206,7 @@ const UsersTable = () => {
     const handleRegisterUser = async (values: RegisterUser) => {
         try {
             await registerUser(values).unwrap();
-            message.success('User registered successfully');
+            messageApi?.success('User registered successfully');
             setRegisterUserModalVisible(false);
             form.resetFields();
             refetch();
@@ -184,93 +216,105 @@ const UsersTable = () => {
                 || (error as ErrorResponse).data?.errors?.join(', ')
                 || 'Failed to register user';
 
-            message.error(errorMessage);
+            messageApi?.error(errorMessage);
         }
     };
-    
+
+    const handleRefresh = () => {
+        setPageIndex(0);
+        if (selectedRoleId) {
+            refetchUsersByRole();
+        } else if (searchText) {
+            refetchDynamicUsers();
+        } else {
+            refetch();
+        }
+    };
+
     const { useBreakpoint } = Grid;
     const screens = useBreakpoint();
 
     return (
         <>
-            <Card
-                title="Users"
-                extra={
-                    <Button
-                        type="primary"
-                        onClick={() => setRegisterUserModalVisible(true)}
-                    >
-                        New User
-                    </Button>
-                }
-                style={{
-                    margin: screens.xs ? '2px 0px' : '2px 16px',
-                    padding: screens.xs ? '4px 0px' : '4px',
-                }}
-                bodyStyle={{
-                    padding: screens.xs ? '4px' : '16px',
-                }}
-                headStyle={{
-                    padding: screens.xs ? '4px 6px' : '4px',
-                }}
-            >
-                <UserSearchFilters
-                    onSearchFieldChange={setSearchField}
-                    onSearchTextChange={debouncedSearch}
-                    onRoleFilterChange={setSelectedRoleId}
-                    selectedRoleId={selectedRoleId}
-                    roles={rolesData?.items}
-                />
-                <Table<User>
-                    columns={columns}
-                    dataSource={userData?.items}
-                    loading={isLoading}
-                    rowKey="id"
-                    pagination={false}
-                    onChange={handleTableChange}
-                    style={{
-                        width: '100%',
-                        overflowX: 'auto',
-                    }}
-                />
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginTop: 16 }}>
-                    <Pagination
-                        current={pageIndex + 1}
-                        pageSize={pageSize}
-                        total={userData?.totalCount}
-                        onChange={(page, newPageSize) => {
-                            setPageIndex(page - 1);
-                            setPageSize(newPageSize);
+            <Layout style={{ background: 'inherit', padding: 0 }}>
+                <Content style={{ padding: 0, width: '100%' }}>
+                    <Typography.Title level={2}>Users Management</Typography.Title>
+                    <Card
+                        title="Users"
+                        extra={
+                            <Button
+                                type="primary"
+                                onClick={() => setRegisterUserModalVisible(true)}
+                            >
+                                New User
+                            </Button>
+                        }
+                        style={{
+                            margin: screens.xs ? '2px 0px' : '2px 16px',
+                            padding: screens.xs ? '4px 0px' : '4px',
                         }}
-                        responsive
-                    />
-                    <Select
-                        value={pageSize}
-                        onChange={(value) => setPageSize(value)}
-                        style={{ width: 100, marginLeft: 16 }}
+                        bodyStyle={{
+                            padding: screens.xs ? '4px' : '16px',
+                        }}
+                        headStyle={{
+                            padding: screens.xs ? '4px 6px' : '4px',
+                        }}
                     >
-                        <Select.Option value={5}>5 / page</Select.Option>
-                        <Select.Option value={10}>10 / page</Select.Option>
-                        <Select.Option value={20}>20 / page</Select.Option>
-                        <Select.Option value={50}>50 / page</Select.Option>
-                        <Select.Option value={100}>100 / page</Select.Option>
-                    </Select>
-                </div>
-            </Card>
-            <EditUserModal
-                visible={editModalVisible}
-                onClose={() => setEditModalVisible(false)}
-                selectedUser={selectedUser}
-                roles={roles}
-                selectedRoles={selectedRoles}
-                onRoleChange={handleRoleChange}
-            />
-            <RegisterUserModal
-                visible={registerUserModalVisible}
-                onClose={() => setRegisterUserModalVisible(false)}
-                onRegister={handleRegisterUser}
-            />
+                        <UserSearchFilters
+                            onSearchFieldChange={setSearchField}
+                            onSearchTextChange={debouncedSearch}
+                            onRoleFilterChange={setSelectedRoleId}
+                            selectedRoleId={selectedRoleId}
+                            roles={rolesData?.items}
+                            onRefresh={handleRefresh}
+                            isLoading={isLoading}
+                        />
+                        <Table<UserInfo>
+                            columns={columns}
+                            dataSource={userData?.items}
+                            loading={isLoading}
+                            rowKey="id"
+                            pagination={false}
+                            onChange={handleTableChange}
+                            style={{
+                                width: '100%',
+                                overflowX: 'auto',
+                            }}
+                        />
+                        <Pagination
+                            current={pageIndex + 1}
+                            pageSize={pageSize}
+                            total={userData?.totalCount}
+                            onChange={(page, newPageSize) => {
+                                setPageIndex(page - 1);
+                                setPageSize(newPageSize);
+                            }}
+                            responsive
+                            showSizeChanger
+                            showTotal={total => `${total} Users in total`}
+                            style={{
+                                marginTop: 16,
+                                textAlign: 'right',
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                            }}
+                        />
+                    </Card>
+                    <EditUserModal
+                        visible={editModalVisible}
+                        onClose={() => setEditModalVisible(false)}
+                        selectedUser={selectedUser}
+                        roles={roles}
+                        selectedRoles={selectedRoles}
+                        onRoleChange={handleRoleChange}
+                    />
+                    <RegisterUserModal
+                        visible={registerUserModalVisible}
+                        onClose={() => setRegisterUserModalVisible(false)}
+                        onRegister={handleRegisterUser}
+                    />
+                </Content>
+            </Layout>
         </>
     );
 };

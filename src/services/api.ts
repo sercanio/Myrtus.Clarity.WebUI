@@ -7,11 +7,16 @@ interface UserInfo {
   lastName: string;
   roles: string[];
   avatarUrl?: string;
+  notificationPreference: {
+    isInAppNotificationEnabled: boolean;
+    isEmailNotificationEnabled: boolean;
+    isPushNotificationEnabled: boolean;
+  };
 }
 
 export class ApiService {
   static async fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const accessToken = localStorage.getItem('id_token'); // Correct key
+    const accessToken = localStorage.getItem('id_token');
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,

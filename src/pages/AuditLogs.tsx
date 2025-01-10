@@ -1,13 +1,16 @@
-
 import React from 'react';
-import { Tabs } from 'antd';
+import { Tabs, Typography } from 'antd';
 import ActivityMonitor from './ActivityMonitor';
-import AuditLogsList from '../features/auditLogs/components/AuditLogsList';
+import AuditLogsList from '@features/auditLogs/components/AuditLogsList';
 
 const { TabPane } = Tabs;
 
 const AuditLogs: React.FC = () => {
     return (
+        <>
+        <Typography.Title level={2}>
+            Auditing
+        </Typography.Title>
         <Tabs defaultActiveKey="1">
             <TabPane tab="Audit Logs" key="1" >
                 <AuditLogsList />
@@ -16,6 +19,7 @@ const AuditLogs: React.FC = () => {
                 <ActivityMonitor />
             </TabPane>
         </Tabs>
+        </>
     );
 };
 

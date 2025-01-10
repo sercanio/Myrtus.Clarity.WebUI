@@ -1,10 +1,11 @@
 import { Modal, Button, Checkbox } from 'antd';
-import { Role, User } from '../../../types/user';
+import type { UserInfo } from '@/types/user';
+import type { Role } from '@/types/role';
 
 interface EditUserModalProps {
     visible: boolean;
     onClose: () => void;
-    selectedUser: User | null;
+    selectedUser: UserInfo | null;
     roles: Role[];
     selectedRoles: Set<string>;
     onRoleChange: (roleId: string, checked: boolean) => Promise<void>;
@@ -33,11 +34,11 @@ export const EditUserModal = ({
                 <div style={{ marginBottom: 16 }}>
                     <div>
                         <strong>Name: </strong>
-                        &nbsp;{selectedUser.firstName} {selectedUser.lastName}
+                        &nbsp;{selectedUser.firstName.value} {selectedUser.lastName.value}
                     </div>
                     <div>
                         <strong>Email: </strong>
-                        &nbsp;{selectedUser.email}
+                        &nbsp;{selectedUser.email.value}
                     </div>
                 </div>
                 <div>

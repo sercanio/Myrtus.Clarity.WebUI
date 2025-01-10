@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
+import loadedModules from '@src/modules/modulesLoader';
 
 const { Sider } = Layout;
 const { useBreakpoint } = Grid;
@@ -24,7 +25,7 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const { token } = theme.useToken();
   const screens = useBreakpoint();
 
-  const items: MenuProps['items'] = [
+  const coreMenuItems: MenuProps['items'] = [
     {
       key: 'user-management',
       icon: <UserOutlined />,
@@ -42,16 +43,28 @@ function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
         },
       ],
     },
-    {
-      key: '/audit-logs',
-      icon: <FileSearchOutlined />,
-      label: 'Audit Logs',
-    },
-    {
-      key: '/settings',
-      icon: <SettingOutlined />,
-      label: 'Settings',
-    },
+  ];
+
+  const settingsMenuItem = {
+    key: '/settings',
+    icon: <SettingOutlined />,
+    label: 'Settings',
+  };
+
+  const auditLogsMenuItem = {
+    key: '/audit-logs',
+    icon: <FileSearchOutlined />,
+    label: 'Audit Logs',
+  };
+
+  const dynamicMenuItems = loadedModules
+    .flatMap((mod) => mod.sideMenuItems ?? []);
+
+  const items: MenuProps['items'] = [
+    ...coreMenuItems,
+    ...dynamicMenuItems,
+    auditLogsMenuItem,
+    settingsMenuItem,
   ];
 
   const onClick: MenuProps['onClick'] = (e) => {

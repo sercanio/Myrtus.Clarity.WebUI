@@ -1,6 +1,6 @@
-import { Input, Select, Space, Grid } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import { Role } from '../../../types/user';
+import { Input, Select, Space, Grid, Button } from 'antd';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import type { Role } from '@/types/role';
 
 const { Option } = Select;
 const { useBreakpoint } = Grid;
@@ -11,6 +11,8 @@ interface UserSearchFiltersProps {
     onRoleFilterChange: (roleId: string | undefined) => void;
     selectedRoleId?: string;
     roles?: Role[];
+    onRefresh: () => void;
+    isLoading: boolean;
 }
 
 export const UserSearchFilters = ({
@@ -18,7 +20,9 @@ export const UserSearchFilters = ({
     onSearchTextChange,
     onRoleFilterChange,
     selectedRoleId,
-    roles
+    roles,
+    onRefresh,
+    isLoading
 }: UserSearchFiltersProps) => {
     const screens = useBreakpoint();
 
@@ -28,7 +32,7 @@ export const UserSearchFilters = ({
             direction={screens.xs ? 'vertical' : 'horizontal'}
             style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: 16 }}
         >
-            <Input.Group compact style={{ display: 'flex', flexDirection: screens.xs ? 'column' : 'row' }}>
+            <Input.Group compact style={{ display: 'flex', flexDirection: screens.xs ? 'column' : 'row', gap: '8px' }}>
                 <Select
                     defaultValue="firstName"
                     style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
@@ -43,7 +47,17 @@ export const UserSearchFilters = ({
                     prefix={<SearchOutlined />}
                     onChange={e => onSearchTextChange(e.target.value)}
                     style={{ width: screens.xs ? '100%' : 200 }}
+                    allowClear
                 />
+                <Button
+                    icon={<ReloadOutlined />}
+                    onClick={onRefresh}
+                    loading={isLoading}
+                    disabled={isLoading}
+                    style={{ width: screens.xs ? '100%' : 'auto' }}
+                >
+                    Refresh
+                </Button>
             </Input.Group>
             <Select
                 allowClear

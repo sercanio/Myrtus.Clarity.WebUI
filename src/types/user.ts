@@ -1,22 +1,13 @@
-export interface Role {
-  id: string;
-  name: string;
-}
+import { NotificationPreference } from "./notification";
+import { Role } from "./role";
+import { ValueObject } from "./valueObject";
 
-export interface User {
+export interface UserInfo {
   id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
+  email: ValueObject<string>;
+  firstName: ValueObject<string>;
+  lastName: ValueObject<string>;
   roles: Role[];
+  avatarUrl?: string;
+  notificationPreference: NotificationPreference;
 }
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  pageIndex: number;
-  pageSize: number;
-  totalPages: number;
-  totalCount: number;
-  hasPreviousPage: boolean;
-  hasNextPage: boolean;
-} 

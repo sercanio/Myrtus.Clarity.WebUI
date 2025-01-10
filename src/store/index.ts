@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { api } from './api';
-import authReducer from './slices/authSlice';
-import uiReducer from './slices/uiSlice';
+import authReducer from '@store/slices/authSlice';
+import uiReducer from '@store/slices/uiSlice';
+import loadedModules from '@src/modules/modulesLoader';
 
 export const store = configureStore({
   reducer: {
@@ -14,9 +15,13 @@ export const store = configureStore({
     getDefaultMiddleware().concat(api.middleware),
 });
 
-setupListeners(store.dispatch);
+loadedModules.forEach((mod) => {
+  if (mod.initStore) {
+    mod.initStore();
+  }
+});
 
-// Ensure any middleware related to Keycloak is removed and Azure AD B2C is integrated.
+setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
