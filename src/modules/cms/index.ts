@@ -2,6 +2,7 @@ import React from 'react';
 import type { IModuleDefinition } from '../IModuleDefinition';
 import CmsContents from './pages/CmsContents';
 import ContentAddPage from './pages/ContentAddPage';
+import ContentEditPage from './pages/ContentEditPage'; // Import the new page
 import MediaLibrary from './components/MediaLibrary';
 import { addCmsEndpoints } from './store/services/cmsApi';  // Updated import
 import { FileTextOutlined, EditOutlined, PlusOutlined, PictureOutlined } from '@ant-design/icons';
@@ -45,6 +46,10 @@ const cmsModule: IModuleDefinition = {
     {
       path: '/cms/contents/add',
       element: React.createElement(ContentAddPage),
+    },
+    {
+      path: '/cms/contents/edit/:id', // Add the new route
+      element: React.createElement(ContentEditPage),
     },
     {
       path: '/cms/media',

@@ -12,6 +12,7 @@ export interface ContentDto {
   tags: string[];
   status: string;
   language: string;
+  coverImageUrl?: string; // Added coverImageUrl
   metaTitle: string;
   metaDescription: string;
   metaKeywords: string[];
@@ -82,6 +83,12 @@ export interface DynamicMediaQueryArgs {
   requestBody: DynamicQueryRequest;
 }
 
+export interface DynamicContentQueryArgs {
+  pageIndex: number;
+  pageSize: number;
+  requestBody: DynamicQueryRequest;
+}
+
 // Keep track of whether we’ve injected endpoints before
 let endpointsInjected = false;
 
@@ -101,21 +108,30 @@ export function addCmsEndpoints() {
     extendedApi = baseApi.injectEndpoints({
       endpoints: (builder) => ({
       getContentById: builder.query<Content, string>({
-        query: (id) => `cms/${id}`,
+        query: (id) => `content/${id}`,
         providesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
       }),
 
       getAllContents: builder.query<PaginatedResponse<Content>, { pageIndex: number; pageSize: number }>({
         query: ({ pageIndex, pageSize }) => ({
-        url: 'cms',
+        url: 'content',
         params: { pageIndex, pageSize },
+        }),
+        providesTags: ['Contents'],
+      }),
+
+      getAllContentsDynamic: builder.query<PaginatedResponse<Content>, DynamicContentQueryArgs>({
+        query: ({ pageIndex, pageSize, requestBody }) => ({
+          url: `content/dynamic?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+          method: 'POST',
+          body: requestBody,
         }),
         providesTags: ['Contents'],
       }),
 
       createContent: builder.mutation<Content, ContentDto>({
         query: (content) => ({
-        url: 'cms',
+        url: 'content',
         method: 'POST',
         body: content,
         }),
@@ -124,7 +140,7 @@ export function addCmsEndpoints() {
 
       updateContent: builder.mutation<void, { id: string; content: ContentDto }>({
         query: ({ id, content }) => ({
-        url: `cms/${id}`,
+        url: `content/${id}`,
         method: 'PUT',
         body: content,
         }),
@@ -133,7 +149,7 @@ export function addCmsEndpoints() {
 
       deleteContent: builder.mutation<void, string>({
         query: (id) => ({
-        url: `cms/${id}`,
+        url: `content/${id}`,
         method: 'DELETE',
         }),
         invalidatesTags: (): [{ type: 'Contents' }] => [{ type: 'Contents' }],
@@ -141,7 +157,7 @@ export function addCmsEndpoints() {
 
       restoreContentVersion: builder.mutation<void, { id: string; versionNumber: number }>({
         query: ({ id, versionNumber }) => ({
-        url: `cms/${id}/restore/${versionNumber}`,
+        url: `content/${id}/restore/${versionNumber}`,
         method: 'POST',
         }),
         invalidatesTags: ['Contents'],
@@ -149,7 +165,7 @@ export function addCmsEndpoints() {
 
       checkSlug: builder.mutation<{ exists: boolean }, { slug: string }>({
         query: (slug) => ({
-        url: `CMS/slug/exists/${slug}`,
+        url: `content/slug/exists/${slug}`,
         method: 'GET',
         }),
         invalidatesTags: ['Contents'],
@@ -212,6 +228,7 @@ export function getCmsHooks() {
   return {
     useGetContentByIdQuery: extendedApi.useGetContentByIdQuery,
     useGetAllContentsQuery: extendedApi.useGetAllContentsQuery,
+    useGetAllContentsDynamicQuery: extendedApi.useGetAllContentsDynamicQuery,
     useCreateContentMutation: extendedApi.useCreateContentMutation, 
     useUpdateContentMutation: extendedApi.useUpdateContentMutation,
     useDeleteContentMutation: extendedApi.useDeleteContentMutation,

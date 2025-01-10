@@ -27,6 +27,7 @@ import {
     ClockCircleOutlined,
     VideoCameraOutlined,
     FilePdfOutlined,
+    PictureOutlined,
 } from '@ant-design/icons';
 import { getCmsHooks } from '@src/modules/cms/store/services/cmsApi';
 import { MessageContext } from '@contexts/MessageContext';
@@ -39,9 +40,10 @@ import { setLoading } from '@src/store/slices/uiSlice';
 
 interface MediaLibraryProps {
     onSelect?: (url: string, alt: string) => void;
+    onSelectCoverImage?: (url: string) => void; // Added onSelectCoverImage
 }
 
-const MediaLibrary: React.FC<MediaLibraryProps> = ({ onSelect }) => {
+const MediaLibrary: React.FC<MediaLibraryProps> = ({ onSelect, onSelectCoverImage }) => {
     const {
         useGetAllMediaDynamicQuery,
         useUploadMediaMutation,
@@ -210,6 +212,11 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ onSelect }) => {
         setPreviewVisible(false);
     };
 
+    const handleSelectCoverImage = (url: string) => {
+        onSelectCoverImage?.(url);
+        setPreviewVisible(false);
+    };
+
     // Helper
     const formatSize = (size: number) => {
         if (size < 1024) return `${size} B`;
@@ -326,7 +333,10 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ onSelect }) => {
                                             )
                                         }
                                         actions={[
-                                            <Space align="center" key="actions">
+                                            <Space
+                                                direction={onSelectCoverImage ? "vertical" : "horizontal"}
+                                                align="center"
+                                                key="actions">
                                                 {onSelect && (
                                                     <Button
                                                         icon={<SelectOutlined />}
@@ -334,6 +344,15 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ onSelect }) => {
                                                         type="link"
                                                     >
                                                         Select
+                                                    </Button>
+                                                )}
+                                                {onSelectCoverImage && (
+                                                    <Button
+                                                        icon={<PictureOutlined />}
+                                                        onClick={() => handleSelectCoverImage(media.blobUri)}
+                                                        type="link"
+                                                    >
+                                                        Set as Cover
                                                     </Button>
                                                 )}
                                                 <Button
@@ -348,7 +367,7 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({ onSelect }) => {
                                         ]}
                                     >
                                         <Card.Meta
-                                            title={<Typography.Text ellipsis>{media.fileName}</Typography.Text>}
+                                            title={<Typography.Text ellipsis title={media.fileName}>{media.fileName}</Typography.Text>}
                                             description={<MetaDataDescription media={media} />}
                                         />
                                     </Card>

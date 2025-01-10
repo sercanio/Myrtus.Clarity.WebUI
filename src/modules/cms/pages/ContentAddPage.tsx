@@ -25,11 +25,15 @@ const ContentAddPage: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
   const screens = useBreakpoint();
   const [slugError, setSlugError] = useState<string | null>(null);
-  const [contentStyle , setContentStyle] = useState<string | null>(null);
-  const [mediaLibraryVisible, setMediaLibraryVisible] = useState(false);
-  const [activeTabKey, setActiveTabKey] = useState('1');
+  const [contentStyle, setContentStyle] = useState<string | null>(null);
 
+  // For opening the media library
+  const [mediaLibraryVisible, setMediaLibraryVisible] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | undefined>(undefined);
+
+  const [activeTabKey, setActiveTabKey] = useState('1');
   const { token } = theme.useToken();
+
   const generateSlug = async (title: string) => {
     const slug = title
       .toLowerCase()
@@ -66,12 +70,20 @@ const ContentAddPage: React.FC = () => {
     setBody(content);
   };
 
+  /**
+   * This is how we insert an in-body image 
+   * (the old approach). If user picks an image from MediaLibrary:
+   */
   const handleMediaSelect = (url: string, alt: string) => {
-    setBody((prevBody) => `${prevBody}<img src="${url}" alt="${alt}" width="500" height="auto" />`);
+    // Insert <img> in the body for inline images
+    setBody((prevBody) => `${prevBody}<img src="${url}" alt="${alt}" width="500" />`);
     setMediaLibraryVisible(false);
-    setActiveTabKey('3'); // Switch to the "Content" tab
+    setActiveTabKey('3'); // Switch to "Content" tab
   };
 
+  /**
+   * Submitting the form
+   */
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -82,6 +94,7 @@ const ContentAddPage: React.FC = () => {
       await createContent({
         ...values,
         body,
+        coverImageUrl, // Include coverImageUrl in payload
         tags: tagsArray,
         status: values.status || 'Draft'
       }).unwrap();
@@ -99,7 +112,6 @@ const ContentAddPage: React.FC = () => {
         }));
         form.setFields(fields);
         messageApi?.error(fields[0].errors);
-
       } else {
         messageApi?.error('Failed to create content');
       }
@@ -107,14 +119,15 @@ const ContentAddPage: React.FC = () => {
   };
 
   return (
-    <Card>
-      <Typography.Title level={2}>Add New Content</Typography.Title>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-      >
-        <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} defaultActiveKey="1" style={{ height: '100%' }}>
+    <Card
+      title="Add Content">
+      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Tabs
+          activeKey={activeTabKey}
+          onChange={setActiveTabKey}
+          defaultActiveKey="1"
+          style={{ height: '100%' }}
+        >
           <TabPane tab="Basic Info" key="1">
             <Row gutter={16}>
               <Col xs={24} md={12}>
@@ -158,10 +171,7 @@ const ContentAddPage: React.FC = () => {
                   name="language"
                   label="Language"
                   rules={[
-                    {
-                      required: true,
-                      message: 'Please input the language!'
-                    }
+                    { required: true, message: 'Please input the language!' }
                   ]}
                 >
                   <Input />
@@ -170,10 +180,7 @@ const ContentAddPage: React.FC = () => {
             </Row>
             <Row gutter={16}>
               <Col xs={24} md={12}>
-                <Form.Item
-                  name="status"
-                  label="Status"
-                >
+                <Form.Item name="status" label="Status">
                   <Select>
                     <Select.Option value="Draft">Draft</Select.Option>
                     <Select.Option value="Published">Published</Select.Option>
@@ -190,7 +197,24 @@ const ContentAddPage: React.FC = () => {
                 </Form.Item>
               </Col>
             </Row>
+
+            {/* COVER IMAGE section */}
+            <Form.Item label="Cover Image">
+              <Space direction="vertical" style={{ width: '100%' }}>
+                {coverImageUrl && (
+                  <img
+                    src={coverImageUrl}
+                    alt="Cover"
+                    style={{ maxWidth: '300px', marginBottom: 8 }}
+                  />
+                )}
+                <Button onClick={() => setMediaLibraryVisible(true)}>
+                  {coverImageUrl ? 'Change Cover Image' : 'Set Cover Image'}
+                </Button>
+              </Space>
+            </Form.Item>
           </TabPane>
+
           <TabPane tab="SEO" key="2">
             <Row gutter={16}>
               <Col xs={24} md={12}>
@@ -224,6 +248,7 @@ const ContentAddPage: React.FC = () => {
               </Col>
             </Row>
           </TabPane>
+
           <TabPane tab="Content" key="3">
             <Row gutter={16} justify="space-between" align="middle" style={{ marginBottom: 16 }}>
               <Col>
@@ -240,9 +265,7 @@ const ContentAddPage: React.FC = () => {
             </Row>
             <Row gutter={16}>
               <Col xs={24} lg={showPreview ? 12 : 24}>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please input the body!' }]}
-                >
+                <Form.Item rules={[{ required: true, message: 'Please input the body!' }]}>
                   <Editor
                     apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
                     value={body}
@@ -254,14 +277,13 @@ const ContentAddPage: React.FC = () => {
                         'advlist autolink lists link image charmap print preview anchor',
                         'searchreplace visualblocks code fullscreen',
                         'insertdatetime media table paste code help wordcount',
-                        'code', 'preview', 
+                        'code', 'preview',
                       ],
                       toolbar:
-                        'undo redo | formatselect | bold italic backcolor | \
-                        alignleft aligncenter alignright alignjustify | \
-                        bullist numlist outdent indent | removeformat | code | preview | help',
-                      content_css: [
-                      ],
+                        'undo redo | formatselect | bold italic backcolor | ' +
+                        'alignleft aligncenter alignright alignjustify | ' +
+                        'bullist numlist outdent indent | removeformat | code | preview | help',
+                      content_css: [],
                       content_style: contentStyle!,
                     }}
                     key={contentStyle}
@@ -278,10 +300,7 @@ const ContentAddPage: React.FC = () => {
                     padding: screens.xs ? '48px 8px' : '0px 8px',
                   }}
                 >
-                  <Card style={{
-                    borderRadius: 0,
-                    border: '1px solid'
-                  }}>
+                  <Card style={{ borderRadius: 0, border: '1px solid' }}>
                     <Typography.Title level={5}>Preview</Typography.Title>
                     <div dangerouslySetInnerHTML={{ __html: body }} />
                   </Card>
@@ -289,19 +308,13 @@ const ContentAddPage: React.FC = () => {
               )}
             </Row>
           </TabPane>
+
           <TabPane tab="Media Library" key="4">
             <Button onClick={() => setMediaLibraryVisible(true)}>Open Media Library</Button>
-            <Modal
-              title="Media Library"
-              visible={mediaLibraryVisible}
-              onCancel={() => setMediaLibraryVisible(false)}
-              footer={null}
-              width={1200}
-            >
-              <MediaLibrary onSelect={handleMediaSelect} />
-            </Modal>
           </TabPane>
         </Tabs>
+
+        {/* Buttons */}
         <Form.Item>
           <Space size="middle" style={{ marginTop: 48 }}>
             <Button type="primary" htmlType="submit">
@@ -313,6 +326,23 @@ const ContentAddPage: React.FC = () => {
           </Space>
         </Form.Item>
       </Form>
+
+      {/* Modal for the Media Library (shared by cover image or inline images) */}
+      <Modal
+        title="Media Library"
+        visible={mediaLibraryVisible}
+        onCancel={() => setMediaLibraryVisible(false)}
+        footer={null}
+        width={1200}
+      >
+        <MediaLibrary
+          onSelect={handleMediaSelect}
+          onSelectCoverImage={(url) => {
+            setCoverImageUrl(url);
+            setMediaLibraryVisible(false);
+          }}
+        />
+      </Modal>
     </Card>
   );
 };
