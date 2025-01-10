@@ -168,16 +168,27 @@ const UsersTable = () => {
 
     const columns: ColumnsType<UserInfo> = [
         {
-            title: 'Name',
-            key: 'name',
+            title: 'First Name',
+            dataIndex: 'firstName',
+            key: 'firstName',
             sorter: true,
-            render: (_, record) => `${record.firstName.value} ${record.lastName.value}`,
+            sortOrder: sortField === 'firstName' ? (sortDirection === 'asc' ? 'ascend' : 'descend') : undefined,
+            render: (text: string) => text,
+        },
+        {
+            title: 'Last Name',
+            dataIndex: 'lastName',
+            key: 'lastName',
+            sorter: true,
+            sortOrder: sortField === 'lastName' ? (sortDirection === 'asc' ? 'ascend' : 'descend') : undefined,
+            render: (text: string) => text,
         },
         {
             title: 'Email',
-            dataIndex: ['email', 'value'],
+            dataIndex: 'email',
             key: 'email',
             sorter: true,
+            sortOrder: sortField === 'email' ? (sortDirection === 'asc' ? 'ascend' : 'descend') : undefined,
         },
         {
             title: 'Roles',
