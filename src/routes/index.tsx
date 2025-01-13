@@ -1,4 +1,6 @@
-import { Routes, Route, RouteObject } from 'react-router-dom';
+// src/AppRoutes.tsx
+
+import { Routes, Route } from 'react-router-dom';
 import Users from '@pages/Users';
 import Roles from '@pages/Roles';
 import Settings from '@pages/Settings';
@@ -11,8 +13,10 @@ import AuditLogs from '@pages/AuditLogs';
 import Home from '@pages/Home';
 import Landing from '@pages/Landing';
 import loadedModules from '@src/modules/modulesLoader';
+import type { ExtendedRouteObject } from '@types/ExtendedRouteObject'; // Adjust the import path accordingly
 
-const ROLES = {
+// eslint-disable-next-line react-refresh/only-export-components
+export const ROLES = {
   ADMIN: 'Admin',
   EDITOR: 'Editor',
   REGISTERED: 'Registered',
@@ -21,8 +25,7 @@ const ROLES = {
 function AppRoutes() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
-
-  const staticRoutes: RouteObject[] = [
+  const staticRoutes: ExtendedRouteObject[] = [
     {
       path: '/',
       element: isAuthenticated ? <Home /> : <Landing />,
@@ -73,15 +76,27 @@ function AppRoutes() {
     },
   ];
 
-  const moduleRoutes = loadedModules.flatMap((mod) => mod.routes);
+  const moduleRoutes: ExtendedRouteObject[] = loadedModules.flatMap((mod) => mod.routes as ExtendedRouteObject[]);
 
-  const appRoutes = [...staticRoutes, ...moduleRoutes];
+  const appRoutes: ExtendedRouteObject[] = [...staticRoutes, ...moduleRoutes];
 
   return (
     <Routes>
-      {appRoutes.map((route, i) => (
-        <Route key={i} path={route.path} element={route.element} />
-      ))}
+      {appRoutes.map((route, i) => {
+        // Destructure requiredRoles from the route
+        const { requiredRoles, element, ...rest } = route;
+
+        // Determine the element to render
+        const routeElement = requiredRoles ? (
+          <ProtectedRoute requiredRoles={requiredRoles}>
+            {element}
+          </ProtectedRoute>
+        ) : (
+          element
+        );
+
+        return <Route key={i} {...rest} element={routeElement} />;
+      })}
     </Routes>
   );
 }

@@ -59,6 +59,21 @@ export interface UploadMediaRequest {
   file: File;
 }
 
+export interface SEOSettings {
+  id: string;
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string[];
+  // Add other SEO-related fields as needed
+}
+
+export interface UpdateSEOSettingsDto {
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string[];
+  // Add other fields that can be updated
+}
+
 export interface DynamicSort {
   field: string;
   dir: 'asc' | 'desc';
@@ -204,6 +219,20 @@ export function addCmsEndpoints() {
           }),
           invalidatesTags: ['Media'],
         }),
+
+        getSEOSettings: builder.query<SEOSettings, void>({
+          query: () => `SEO`,
+          providesTags: ['SEO'],
+        }),
+    
+        updateSEOSettings: builder.mutation<SEOSettings, UpdateSEOSettingsDto>({
+          query: (seoSettings) => ({
+            url: `SEO`,
+            method: 'PUT',
+            body: seoSettings,
+          }),
+          invalidatesTags: ['SEO'],
+        }),
       }),
       overrideExisting: false,
     });
@@ -237,5 +266,7 @@ export function getCmsHooks() {
     useGetAllMediaDynamicQuery: extendedApi.useGetAllMediaDynamicQuery,
     useUploadMediaMutation: extendedApi.useUploadMediaMutation,
     useDeleteMediaMutation: extendedApi.useDeleteMediaMutation,
+    useGetSEOSettingsQuery: extendedApi.useGetSEOSettingsQuery,
+    useUpdateSEOSettingsMutation: extendedApi.useUpdateSEOSettingsMutation
   };
 }

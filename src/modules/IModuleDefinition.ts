@@ -1,4 +1,6 @@
-import type { RouteObject } from 'react-router-dom';
+// src/modules/IModuleDefinition.ts
+
+import type { ExtendedRouteObject } from '@/types/ExtendedRouteObject'; // Adjust the import path accordingly
 import type { MenuProps } from 'antd';
 
 /**
@@ -11,19 +13,19 @@ export interface IModuleDefinition {
   name: string;
 
   /**
-   * React Router v6+ route definitions 
-   * e.g. [{ path: '/cms/contents', element: <CmsContents /> }, ...]
+   * React Router v6+ route definitions.
+   * Each route can optionally include `requiredRoles` for protection.
    */
-  routes: RouteObject[];
+  routes: ExtendedRouteObject[];
 
   /**
-   * Side Menu items for Ant Design (or your chosen UI library)
-   * e.g. a subtree for "Content Management"
+   * Side Menu items for Ant Design (or your chosen UI library).
+   * Typically a subtree for module-specific navigation.
    */
   sideMenuItems?: MenuProps['items'];
 
   /**
-   * An optional initialization function if the module wants to 
+   * An optional initialization function if the module wants to
    * dynamically inject RTK Query endpoints or Redux slices, etc.
    */
   initStore?: () => void;

@@ -28,6 +28,7 @@ export default defineConfig({
       '@pages': path.resolve(__dirname, './src/pages'),
       '@config': path.resolve(__dirname, './src/config'),
       '@contexts': path.resolve(__dirname, './src/contexts'),
+      '@constants': path.resolve(__dirname, './src/constants'),
     },
   },
 })
