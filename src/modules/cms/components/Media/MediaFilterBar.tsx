@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Select, Input, Space, Tooltip, Button, Flex } from 'antd';
 import { ClearOutlined, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
-import type { DynamicQueryRequest, DynamicFilter, DynamicSort } from '../store/services/cmsApi';
+import type { DynamicQueryRequest, DynamicFilter, DynamicSort } from '../../store/services/cmsApi';
 
 const { Option } = Select;
 
