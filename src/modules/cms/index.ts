@@ -1,14 +1,14 @@
 import React from 'react';
 import type { IModuleDefinition } from '../IModuleDefinition';
-import CmsContents from './pages/CmsContents';
-import ContentAddPage from './pages/ContentAddPage';
-import ContentEditPage from './pages/ContentEditPage'; // Import the new page
-import MediaLibrary from './components/MediaLibrary';
+import CmsContents from './pages/Content/CmsContents';
+import ContentAddPage from './pages/Content/ContentAddPage';
+import ContentEditPage from './pages/Content/ContentEditPage'; // Import the new page
 import { addCmsEndpoints } from './store/services/cmsApi';  // Updated import
 import { FileTextOutlined, EditOutlined, PlusOutlined, PictureOutlined, GlobalOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import SEOSettingsPage from './pages/SEOSettingsPage';
+import SEOSettingsPage from './pages/SEO/SEOSettingsPage';
 import { ROLES } from '@src/routes';
+import MediaLibraryPage from './pages/Media/MediaLibraryPage';
 
 const sideMenuItems: MenuProps['items'] = [
   {
@@ -64,7 +64,7 @@ const cmsModule: IModuleDefinition = {
     },
     {
       path: '/cms/media',
-      element: React.createElement(MediaLibrary),
+      element: React.createElement(MediaLibraryPage),
       requiredRoles: [ROLES.ADMIN, ROLES.EDITOR],
     },
     {

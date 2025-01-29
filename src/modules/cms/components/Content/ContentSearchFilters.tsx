@@ -1,7 +1,7 @@
 import { Space, Input, Select, Button, Card, Tooltip } from 'antd';
 import { SearchOutlined, ReloadOutlined, ClearOutlined } from '@ant-design/icons';
 import { useState, useEffect, useCallback } from 'react';
-import type { DynamicQueryRequest } from '../store/services/cmsApi';
+import type { DynamicQueryRequest } from '../../store/services/cmsApi';
 
 interface ContentSearchFiltersProps {
   onRefresh: () => void;
