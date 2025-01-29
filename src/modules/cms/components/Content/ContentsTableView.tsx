@@ -1,15 +1,15 @@
 import React from 'react';
-import { Table, Typography, Tag, Space } from 'antd';
+import { Image, Table, Typography, Tag, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { ContentEntity } from './ContentsManagement';
 import FormattedDate from '@components/FormattedDate';
 import ContentActions from './ContentActions';
+import type { Content } from '@srcmodules/cms/store/services/cmsApi';
 
 interface ContentsTableViewProps {
-  contents: ContentEntity[];
-  onEdit: (content: ContentEntity) => void;
+  contents: Content[];
+  onEdit: (content: Content) => void;
   onDelete: (id: string) => void;
-  onViewVersions: (content: ContentEntity) => void;
+  onViewVersions: (content: Content) => void;
   onSort: (sorter: { field?: string; order?: 'ascend' | 'descend' }) => void;
   dynamicRequest: {
     sort: { field: string; dir: 'asc' | 'desc' }[];
@@ -31,14 +31,14 @@ const ContentsTableView: React.FC<ContentsTableViewProps> = ({
   onSort,
   dynamicRequest,
 }) => {
-  const columns: ColumnsType<ContentEntity> = [
+  const columns: ColumnsType<Content> = [
     {
       title: 'Cover',
       dataIndex: 'coverImageUrl',
       key: 'cover',
       render: (url: string) =>
         url ? (
-          <img
+          <Image
             src={url}
             alt="Cover"
             style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }}
@@ -140,7 +140,7 @@ const ContentsTableView: React.FC<ContentsTableViewProps> = ({
   ];
 
   return (
-    <Table<ContentEntity>
+    <Table<Content>
       columns={columns}
       dataSource={contents}
       rowKey="id"
