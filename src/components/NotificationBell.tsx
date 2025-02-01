@@ -41,7 +41,7 @@ const NotificationBell: React.FC = () => {
   useEffect(() => {
     if (authSlice.accessToken) {
       const newConnection = new HubConnectionBuilder()
-        .withUrl('https://localhost:5001/notificationHub', {
+        .withUrl(import.meta.env.VITE_SOCKET_NOTIFICATIONHUB,{
           accessTokenFactory: () => authSlice.accessToken as string,
         })
         .configureLogging(LogLevel.Information)

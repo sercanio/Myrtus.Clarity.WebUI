@@ -58,7 +58,7 @@ const ActivityMonitor: React.FC = () => {
 
     useEffect(() => {
         const connection = new HubConnectionBuilder()
-            .withUrl('https://localhost:5001/auditLogHub')
+            .withUrl(import.meta.env.VITE_SOCKET_AUDITLOGHUB)
             .configureLogging(LogLevel.Information)
             .build();
 
