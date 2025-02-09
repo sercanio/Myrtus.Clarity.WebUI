@@ -13,7 +13,7 @@ import AuditLogs from '@pages/AuditLogs';
 import Home from '@pages/Home';
 import Landing from '@pages/Landing';
 import loadedModules from '@src/modules/modulesLoader';
-import type { ExtendedRouteObject } from '@types/ExtendedRouteObject'; // Adjust the import path accordingly
+import type { ExtendedRouteObject } from '@/types/ExtendedRouteObject'; // Adjust the import path accordingly
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const ROLES = {
@@ -95,7 +95,8 @@ function AppRoutes() {
           element
         );
 
-        return <Route key={i} {...rest} element={routeElement} />;
+      // @ts-expect-error React Router typing issue
+      return <Route key={i} {...rest} element={routeElement} />;      
       })}
     </Routes>
   );
