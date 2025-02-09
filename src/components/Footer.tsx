@@ -5,7 +5,7 @@ const { Footer: AntFooter } = Layout;
 function Footer() {
   return (
     <AntFooter style={{ textAlign: 'center' }}>
-      ©{new Date().getFullYear()} Myrtus Clarity. All Rights Reserved.
+      ©{new Date().getFullYear()} DenemeApp29 Clarity. All Rights Reserved.
     </AntFooter>
   );
 }
