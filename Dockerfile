@@ -16,7 +16,7 @@ FROM nginx:stable-alpine
 RUN rm -rf /etc/nginx/conf.d/default.conf
 
 # Copy your custom configuration
-COPY default.conf /etc/nginx/conf.d/
+COPY nginx/default.conf /etc/nginx/conf.d/
 
 # (Optional) Remove the default Nginx content
 RUN rm -rf /usr/share/nginx/html/*
