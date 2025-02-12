@@ -1,4 +1,4 @@
-# DenemeApp29 Clarity WebUI
+# Clarity WebUI
 
 DenemeApp29 Clarity WebUI is a React-based web application designed for managing user authentication and administration. It leverages Redux Toolkit for state management, Azure AD B2C for authentication, and Ant Design for a responsive and user-friendly interface.
 
