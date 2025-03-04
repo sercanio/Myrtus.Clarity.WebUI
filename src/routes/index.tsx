@@ -14,6 +14,7 @@ import Home from '@pages/Home';
 import Landing from '@pages/Landing';
 import loadedModules from '@src/modules/modulesLoader';
 import type { ExtendedRouteObject } from '@/types/ExtendedRouteObject'; // Adjust the import path accordingly
+import LoginPage from '@src/pages/LoginPage';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const ROLES = {
@@ -23,12 +24,19 @@ export const ROLES = {
 } as const;
 
 function AppRoutes() {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const staticRoutes: ExtendedRouteObject[] = [
     {
       path: '/',
-      element: isAuthenticated ? <Home /> : <Landing />,
+      element: (
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/login',
+      element: <LoginPage />,
     },
     {
       path: '/auth/callback',
@@ -37,7 +45,7 @@ function AppRoutes() {
     {
       path: '/users',
       element: (
-        <ProtectedRoute requiredRoles={[ROLES.ADMIN, ROLES.REGISTERED]}>
+        <ProtectedRoute requiredRoles={[ROLES.ADMIN]}>
           <Users />
         </ProtectedRoute>
       ),
@@ -45,7 +53,7 @@ function AppRoutes() {
     {
       path: '/roles',
       element: (
-        <ProtectedRoute requiredRoles={[ROLES.ADMIN, ROLES.REGISTERED]}>
+        <ProtectedRoute requiredRoles={[ROLES.ADMIN]}>
           <Roles />
         </ProtectedRoute>
       ),
@@ -53,7 +61,7 @@ function AppRoutes() {
     {
       path: '/settings',
       element: (
-        <ProtectedRoute>
+        <ProtectedRoute requiredRoles={[ROLES.ADMIN]}>
           <Settings />
         </ProtectedRoute>
       ),

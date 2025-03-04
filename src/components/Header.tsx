@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, Flex, Spin } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, message } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   UserOutlined,
@@ -11,16 +11,14 @@ import {
   BulbOutlined,
   BulbFilled,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
 } from '@ant-design/icons';
-import { useMsal, useAccount } from '@azure/msal-react';
-import { login, logoutUser } from '@services/msalService';
-import { loginSuccess } from '@store/slices/authSlice';
-import type { RootState } from '@store/index';
 import { useAppDispatch } from '@store/hooks';
 import NotificationBell from '@components/NotificationBell';
-import { useGetCurrentUserQuery } from '@store/services/accountApi' // Removed comma
-import { UserInfo } from '@/types/user';
+import { useLazyGetCurrentUserQuery, useLogoutMutation } from '@store/services/accountApi';
+import { logoutSuccess } from '@store/slices/authSlice';
+import { api } from '@store/api';
+import type { RootState } from '@store/index';
 
 const { Header: AntHeader } = Layout;
 
@@ -35,13 +33,9 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const { instance, accounts } = useMsal();
-  const account = useAccount(accounts[0] || {});
   const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
-  const { data: userProfile } = useGetCurrentUserQuery(undefined, {
-    skip: !isAuthenticated,
-  });
-
+  const [triggerGetCurrentUser, { data: userProfile }] = useLazyGetCurrentUserQuery();
+  const [logout] = useLogoutMutation();
 
   useEffect(() => {
     const handleResize = () => {
@@ -51,70 +45,20 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const acquireAndStoreToken = async () => {
-      if (isAuthenticated && account) {
-        try {
-          const response = await instance.acquireTokenSilent({
-            scopes: import.meta.env.VITE_AZURE_AD_B2C_SCOPES.split(' '),
-            account: account,
-          });
-          const plainTenantProfiles: Record<string, UserInfo> = account.tenantProfiles
-            ? Object.fromEntries(
-              Object.entries(account.tenantProfiles).map(([key, profile]) => [
-                key, profile as UserInfo
-              ])
-            )
-            : {};
-
-          dispatch(loginSuccess({
-            account: {
-              ...account,
-              tenantProfiles: plainTenantProfiles,
-              firstName: userProfile?.firstName,
-              lastName: userProfile?.lastName,
-              email: userProfile?.email,
-              roles: userProfile?.roles || [],
-              notificationPreferences: userProfile?.notificationPreference,
-              avatarUrl: userProfile?.avatarUrl || 'https://ui-avatars.com/api/?name=John+Doe&background=random&rounded=true&bold=true&size=128',
-            },
-            accessToken: response.accessToken
-          }));
-        } catch (error: any) {
-          console.error('Token acquisition error in Header.tsx:', error);
-          // Optionally handle token acquisition failure
-        }
-      }
-    };
-    acquireAndStoreToken();
-  }, [isAuthenticated, account, instance, dispatch, userProfile?.firstName, userProfile?.lastName, userProfile?.email, userProfile?.roles, userProfile?.notificationPreference, userProfile?.avatarUrl]);
-
-  const handleLogin = async () => {
-    try {
-      const result = await login();
-      if (result?.account && result?.accessToken) {
-        const plainTenantProfiles = result.account.tenantProfiles
-          ? Object.fromEntries(result.account.tenantProfiles)
-          : {};
-
-        dispatch(loginSuccess({
-          account: {
-            ...result.account,
-            tenantProfiles: plainTenantProfiles,
-          },
-          accessToken: result.accessToken,
-        }));
-      } else {
-        console.error('Login successful but no access token received');
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-      // Optionally show error message to user
-    }
+  const handleLogin = () => {
+    navigate('/login');
   };
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      dispatch(logoutSuccess());
+      dispatch(api.util.resetApiState());
+      navigate('/login');
+      message.success('Logged out successfully!');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const userMenuItems: MenuProps['items'] = [
@@ -123,17 +67,17 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       label: (
         <div style={{ padding: '4px 0' }}>
           <Typography.Text strong>
-            {userProfile?.firstName?.value} {userProfile?.lastName?.value}
+            {userProfile?.userName || user?.userName}
           </Typography.Text>
           <br />
-          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>{userProfile?.email?.value}</Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+            {userProfile?.email?.toString() || user?.email?.toString()}
+          </Typography.Text>
         </div>
       ),
       disabled: true,
     },
-    {
-      type: 'divider',
-    },
+    { type: 'divider' },
     {
       key: 'profile',
       icon: <UserOutlined />,
@@ -146,9 +90,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       label: 'Settings',
       onClick: () => navigate('/settings'),
     },
-    {
-      type: 'divider',
-    },
+    { type: 'divider' },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -162,31 +104,16 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const modifierKey = isMac ? '⌘' : 'Ctrl';
 
   return (
-    <AntHeader style={{
-      padding: '0 24px',
-      background: isDarkMode ? '#141414' : '#fff',
-    }}>
-      <Flex
-        gap="middle"
-        align="center"
-        justify="space-between">
+    <AntHeader style={{ padding: '0 24px', background: isDarkMode ? '#141414' : '#fff' }}>
+      <Space style={{ justifyContent: 'space-between', width: '100%' }}>
         <Space>
           {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
             onClick: () => setCollapsed(!collapsed),
-            style: {
-              position: 'relative',
-              top: '1.5px',
-              fontSize: '16px',
-              cursor: 'pointer'
-            }
+            style: { fontSize: '16px', cursor: 'pointer' },
           })}
-          {isXLScreen && (
-            <Tag color="cyan">
-              {modifierKey} + B
-            </Tag>
-          )}
+          {isXLScreen && <Tag color="cyan">{modifierKey} + B</Tag>}
         </Space>
-        <Flex gap="middle" align='center'>
+        <Space align="center">
           <Switch
             checkedChildren={<BulbOutlined />}
             unCheckedChildren={<BulbFilled />}
@@ -194,30 +121,20 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             onChange={setDarkMode}
           />
           {isAuthenticated ? (
-            <>
-              <NotificationBell />
-              <Dropdown
-                menu={{ items: userMenuItems }}
-                trigger={['hover']}
-                placement="bottomLeft"
-              >
-                <Avatar
-                  size="large"
-                  src={user?.avatarUrl}
-                  icon={<Spin size="small" />}
-                  style={{ cursor: 'pointer' }} />
-              </Dropdown>
-            </>
+            <Dropdown menu={{ items: userMenuItems }} trigger={['hover']} placement="bottomLeft">
+              <Space align="center" style={{ cursor: 'pointer' }}>
+                <Avatar size="large" src={user?.avatarUrl} icon={!user?.avatarUrl && <UserOutlined />} />
+                <Typography.Text strong>{user?.userName}</Typography.Text>
+              </Space>
+            </Dropdown>
           ) : (
-            <Button
-              type="primary"
-              icon={<LoginOutlined />}
-              onClick={handleLogin}>
+            <Button type="primary" icon={<LoginOutlined />} onClick={handleLogin}>
               Login
             </Button>
           )}
-        </Flex>
-      </Flex>
+          <NotificationBell />
+        </Space>
+      </Space>
     </AntHeader>
   );
 };

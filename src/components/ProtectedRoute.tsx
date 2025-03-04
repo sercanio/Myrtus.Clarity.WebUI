@@ -3,6 +3,7 @@ import type { RootState } from '@store/index';
 import type { ReactNode } from 'react';
 import ForbiddenAccess from './ForbiddenAccess';
 import LoadingScreen from './LoadingScreen';
+import LoginPage from '@src/pages/LoginPage';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -21,7 +22,7 @@ const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) =
 
   // If not authenticated, redirect to login
   if (!isAuthenticated) {
-    return null;
+    return <LoginPage />;
   }
 
   // Check for required roles
