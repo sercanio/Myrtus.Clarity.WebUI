@@ -34,11 +34,11 @@ export const EditUserModal = ({
                 <div style={{ marginBottom: 16 }}>
                     <div>
                         <strong>Name: </strong>
-                        &nbsp;{selectedUser.firstName.value} {selectedUser.lastName.value}
+                        &nbsp;{selectedUser.userName}
                     </div>
                     <div>
                         <strong>Email: </strong>
-                        &nbsp;{selectedUser.email.value}
+                        &nbsp;{selectedUser.email}
                     </div>
                 </div>
                 <div>

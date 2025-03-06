@@ -22,11 +22,11 @@ const Profile: React.FC = () => {
   const messageApi = useContext(MessageContext);
 
   useEffect(() => {
-    if (user?.notificationPreferences) {
+    if (user?.notificationPreference) {
       const initialPrefs = {
-        inAppNotification: user.notificationPreferences.isInAppNotificationEnabled,
-        emailNotification: user.notificationPreferences.isEmailNotificationEnabled,
-        pushNotification: user.notificationPreferences.isPushNotificationEnabled,
+        inAppNotification: user.notificationPreference.isInAppNotificationEnabled,
+        emailNotification: user.notificationPreference.isEmailNotificationEnabled,
+        pushNotification: user.notificationPreference.isPushNotificationEnabled,
       };
       setPreferences(initialPrefs);
       initialPreferencesRef.current = initialPrefs;
@@ -64,8 +64,7 @@ const Profile: React.FC = () => {
     return <div>No user data available</div>;
   }
 
-  const firstName = user.firstName?.value;
-  const lastName = user.lastName?.value;
+  const userName = user.userName
 
   return (
     <>
@@ -84,9 +83,8 @@ const Profile: React.FC = () => {
                 </Flex>
                 <Typography.Title level={3} style={{ marginBottom: 16 }}>User Profile</Typography.Title>
                 <Descriptions bordered column={1}>
-                  <Descriptions.Item label="First Name">{firstName}</Descriptions.Item>
-                  <Descriptions.Item label="Last Name">{lastName}</Descriptions.Item>
-                  <Descriptions.Item label="Email">{user.username}</Descriptions.Item>
+                  <Descriptions.Item label="Username">{userName}</Descriptions.Item>
+                  <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
                   <Descriptions.Item label="Roles">
                     {user.roles?.map((role) => role.name).join(', ') || 'No roles assigned'}
                   </Descriptions.Item>

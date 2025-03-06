@@ -26,6 +26,11 @@ const formatPermissionName = (permissionName: string): string => {
   return `${action.charAt(0).toUpperCase() + action.slice(1)} ${feature}`;
 };
 
+// First, add this type for role details response
+type RoleDetailsPermission = {
+  name: string;
+};
+
 const RolesManagement = () => {
   const dispatch = useDispatch();
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
@@ -52,6 +57,13 @@ const RolesManagement = () => {
   useEffect(() => {
     dispatch(setLoading(isLoadingRoles || isLoadingPermissions || isLoadingRoleDetails));
   }, [isLoadingRoles, isLoadingPermissions, isLoadingRoleDetails, dispatch]);
+
+  useEffect(() => {
+    if (roleDetails && selectedRoleId) {
+      console.log('Role Details:', roleDetails);
+      console.log('Role Permissions:', roleDetails.permissions);
+    }
+  }, [roleDetails, selectedRoleId]);
 
   const [updatePermission] = useUpdateRolePermissionMutation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -246,7 +258,7 @@ const RolesManagement = () => {
                       {(permissions as Permission[]).map((permission: Permission) => (
                         <Checkbox
                           key={permission.id}
-                          checked={roleDetails?.permissions?.some((p) => p.id === permission.id)}
+                          checked={roleDetails?.permissions?.some((p: RoleDetailsPermission) => p.name === permission.name)}
                           onChange={(e: CheckboxChangeEvent) =>
                             handlePermissionChange(permission.id, e.target.checked)
                           }

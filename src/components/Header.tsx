@@ -34,7 +34,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const [isXLScreen, setIsXLScreen] = useState(window.innerWidth >= 1200);
-  const [triggerGetCurrentUser, { data: userProfile }] = useLazyGetCurrentUserQuery();
+  const [, { data: userProfile }] = useLazyGetCurrentUserQuery();
   const [logout] = useLogoutMutation();
 
   useEffect(() => {
@@ -121,18 +121,20 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             onChange={setDarkMode}
           />
           {isAuthenticated ? (
-            <Dropdown menu={{ items: userMenuItems }} trigger={['hover']} placement="bottomLeft">
-              <Space align="center" style={{ cursor: 'pointer' }}>
-                <Avatar size="large" src={user?.avatarUrl} icon={!user?.avatarUrl && <UserOutlined />} />
-                <Typography.Text strong>{user?.userName}</Typography.Text>
-              </Space>
-            </Dropdown>
+            <>
+              <NotificationBell />
+              <Dropdown menu={{ items: userMenuItems }} trigger={['hover']} placement="bottomLeft">
+                <Space align="center" style={{ cursor: 'pointer' }}>
+                  <Avatar size="large" src={user?.avatarUrl} icon={!user?.avatarUrl && <UserOutlined />} />
+                  <Typography.Text strong>{user?.userName}</Typography.Text>
+                </Space>
+              </Dropdown>
+            </>
           ) : (
             <Button type="primary" icon={<LoginOutlined />} onClick={handleLogin}>
               Login
             </Button>
           )}
-          <NotificationBell />
         </Space>
       </Space>
     </AntHeader>

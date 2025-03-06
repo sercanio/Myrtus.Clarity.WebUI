@@ -34,10 +34,7 @@ export const RegisterUserModal = ({
                 <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Email is required', type: 'email' }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item label="First Name" name="firstName" rules={[{ required: true, message: 'First name is required' }]}>
-                    <Input />
-                </Form.Item>
-                <Form.Item label="Last Name" name="lastName" rules={[{ required: true, message: 'Last name is required' }]}>
+                <Form.Item label="Username" name="username" rules={[{ required: true, message: 'Username is required' }]}>
                     <Input />
                 </Form.Item>
                 <Form.Item label="Password" name="password" rules={[{ required: true, message: 'Password is required' }]}>
