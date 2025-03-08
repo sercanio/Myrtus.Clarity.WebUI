@@ -34,7 +34,7 @@ const NotificationBell: React.FC = () => {
   const [markNotificationsRead] = useMarkNotificationsReadMutation();
   const [isMarkingRead, setIsMarkingRead] = useState(false);
 
-  useEffect(() => {
+  useEffect(() => {    
     if (notificationsData && isInAppNotificationsEnabled) {
       dispatch(setNotifications(notificationsData.paginatedNotifications.items));
       dispatch(setNotificationCount(notificationsData.unreadCount));
@@ -42,7 +42,7 @@ const NotificationBell: React.FC = () => {
   }, [notificationsData, dispatch, isInAppNotificationsEnabled]);
 
   useEffect(() => {
-    if (authSlice.accessToken) {
+    if (authSlice.isAuthenticated) {
       const newConnection = new HubConnectionBuilder()
         .withUrl(import.meta.env.VITE_SOCKET_NOTIFICATIONHUB, { withCredentials: true })
         .configureLogging(LogLevel.Information)
@@ -50,7 +50,7 @@ const NotificationBell: React.FC = () => {
         .build();
       setConnection(newConnection);
     }
-  }, [authSlice.accessToken]);
+  }, [authSlice.isAuthenticated]);
 
   useEffect(() => {
     if (connection && isInAppNotificationsEnabled) {
