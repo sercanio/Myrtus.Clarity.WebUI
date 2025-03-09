@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, message } from 'antd';
+import { Layout, Avatar, Dropdown, Switch, Space, Tag, Button, Typography, message, Divider } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   UserOutlined,
@@ -90,6 +90,12 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
       label: 'Settings',
       onClick: () => navigate('/settings'),
     },
+    {
+      key: 'theme',
+      icon: isDarkMode ? <BulbOutlined /> : <BulbFilled />,
+      label: 'Switch to ' + (isDarkMode ? 'Light' : 'Dark'),
+      onClick: () => setDarkMode(!isDarkMode),
+    },
     { type: 'divider' },
     {
       key: 'logout',
@@ -114,21 +120,15 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
           {isXLScreen && <Tag color="cyan">{modifierKey} + B</Tag>}
         </Space>
         <Space align="center" size={24}>
-          <Switch
-            checkedChildren={<BulbOutlined />}
-            unCheckedChildren={<BulbFilled />}
-            checked={isDarkMode}
-            onChange={setDarkMode}
-          />
           {isAuthenticated ? (
             <Space align="center" size={16}>
+              <NotificationBell />
               <Dropdown menu={{ items: userMenuItems }} trigger={['hover']} placement="bottomLeft">
                 <Space align="center" style={{ cursor: 'pointer' }}>
-                  <Typography.Text strong>{user?.userName}</Typography.Text>
                   <Avatar size="large" src={user?.avatarUrl} icon={!user?.avatarUrl && <UserOutlined />} />
+                  <Typography.Text strong>{user?.userName}</Typography.Text>
                 </Space>
               </Dropdown>
-              <NotificationBell />
             </Space>
           ) : (
             <Button type="primary" icon={<LoginOutlined />} onClick={handleLogin}>
