@@ -34,7 +34,7 @@ export const UserSearchFilters = ({
         >
             <Input.Group compact style={{ display: 'flex', flexDirection: screens.xs ? 'column' : 'row', gap: '8px' }}>
                 <Select
-                    defaultValue="firstName"
+                    defaultValue="IdentityUser.UserName"
                     style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
                     onChange={onSearchFieldChange}
                 >
