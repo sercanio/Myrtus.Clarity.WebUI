@@ -38,9 +38,8 @@ export const UserSearchFilters = ({
                     style={{ width: screens.xs ? '100%' : 120, margin: screens.xs ? '12px 0' : 0 }}
                     onChange={onSearchFieldChange}
                 >
-                    <Option value="firstName">First Name</Option>
-                    <Option value="lastName">Last Name</Option>
-                    <Option value="email">Email</Option>
+                    <Option value="IdentityUser.UserName">Username</Option>
+                    <Option value="IdentityUser.Email">Email</Option>
                 </Select>
                 <Input
                     placeholder="Search users..."
