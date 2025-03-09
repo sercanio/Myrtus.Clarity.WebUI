@@ -113,7 +113,7 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
           })}
           {isXLScreen && <Tag color="cyan">{modifierKey} + B</Tag>}
         </Space>
-        <Space align="center">
+        <Space align="center" size={24}>
           <Switch
             checkedChildren={<BulbOutlined />}
             unCheckedChildren={<BulbFilled />}
@@ -121,15 +121,15 @@ const Header = ({ isDarkMode, setDarkMode, collapsed, setCollapsed }: HeaderProp
             onChange={setDarkMode}
           />
           {isAuthenticated ? (
-            <>
-              <NotificationBell />
+            <Space align="center" size={16}>
               <Dropdown menu={{ items: userMenuItems }} trigger={['hover']} placement="bottomLeft">
                 <Space align="center" style={{ cursor: 'pointer' }}>
-                  <Avatar size="large" src={user?.avatarUrl} icon={!user?.avatarUrl && <UserOutlined />} />
                   <Typography.Text strong>{user?.userName}</Typography.Text>
+                  <Avatar size="large" src={user?.avatarUrl} icon={!user?.avatarUrl && <UserOutlined />} />
                 </Space>
               </Dropdown>
-            </>
+              <NotificationBell />
+            </Space>
           ) : (
             <Button type="primary" icon={<LoginOutlined />} onClick={handleLogin}>
               Login

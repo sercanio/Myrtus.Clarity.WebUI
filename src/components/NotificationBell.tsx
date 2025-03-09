@@ -11,14 +11,14 @@ import { Link } from 'react-router-dom';
 import { useLazyGetCurrentUserQuery } from '@store/services/accountApi';
 import { useMarkNotificationsReadMutation } from '@store/services/userApi';
 import { MessageContext } from '@contexts/MessageContext';
+import { relative } from 'path';
 
 const NotificationBell: React.FC = () => {
   const dispatch = useAppDispatch();
   const notifications = useSelector((state: RootState) => state.ui.notifications);
   const notificationCount = useSelector((state: RootState) => state.ui.notificationCount);
   const authSlice = useSelector((state: RootState) => state.auth);
-  // Use lazy query to fetch current user details when needed
-  const [triggerGetCurrentUser, { data: userProfile }] = useLazyGetCurrentUserQuery();
+  const [, { data: userProfile }] = useLazyGetCurrentUserQuery();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const { data: notificationsData, refetch } = useGetNotificationsQuery({
@@ -201,7 +201,7 @@ const NotificationBell: React.FC = () => {
         onVisibleChange={(visible) => visible && handleBellClick()}
       >
         <span>
-          <BellOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
+          <BellOutlined style={{ position: 'relative', top: '4px', fontSize: '24px', cursor: 'pointer' }} />
         </span>
       </Dropdown>
     </Badge>
