@@ -1,4 +1,3 @@
-// src/store/services/accountApi.ts
 import { api } from '@store/api';
 import { UserInfo } from '@/types/user';
 import type { LoginRequest } from '@/types/loginRequest';
