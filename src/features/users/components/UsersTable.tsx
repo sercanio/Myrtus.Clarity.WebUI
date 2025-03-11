@@ -7,7 +7,6 @@ import {
   Button,
   Tag,
   Space,
-  Form,
   Pagination,
   Grid,
   Layout,
@@ -23,12 +22,8 @@ import {
   useGetUsersByRoleQuery
 } from '@store/services/userApi';
 import { useGetRolesQuery } from '@store/services/roleApi';
-import { useRegisterMutation } from '@store/services/accountApi';
 import { UserSearchFilters } from './UserSearchFilters';
 import { EditUserModal } from './EditUserModal';
-import { RegisterUser } from '@/types/registerUser';
-import { RegisterUserModal } from './RegisterUserModal';
-import type { ErrorResponse } from '@/types/errorResponse';
 import type { UserInfo } from '@/types/user';
 import type { Role } from '@/types/role';
 import { MessageContext } from '@contexts/MessageContext';
@@ -39,12 +34,10 @@ const UsersTable = () => {
   const dispatch = useDispatch();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [registerUserModalVisible, setRegisterUserModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
   const [, setHasChanges] = useState(false);
-  const [registerUser] = useRegisterMutation();
   const { data: rolesData } = useGetRolesQuery({ pageIndex: 0, pageSize: 100 });
   const roles = rolesData?.items ?? [];
 
@@ -54,8 +47,6 @@ const UsersTable = () => {
 
   const [updateUserRole] = useUpdateUserRoleMutation();
   const { refetch } = useGetUsersQuery({ pageIndex, pageSize });
-
-  const [form] = Form.useForm();
 
   const [searchText, setSearchText] = useState('');
   const [searchField, setSearchField] = useState('firstName');
@@ -123,16 +114,24 @@ const UsersTable = () => {
 
   // Modified table change handler for dynamic sorting
   const handleTableChange: TableProps<UserInfo>['onChange'] = (_pagination, _filters, sorter) => {
-    let field = sorter.field as string | null;
+    let field: string | null = null;
+    let order: 'ascend' | 'descend' | null = null;
+
+    if (!Array.isArray(sorter)) {
+      field = sorter.field as string | null;
+      order = sorter.order as 'ascend' | 'descend' | null;
+    }
+
     // Map UI field to nested field for dynamic query sorting
     if (field === 'email') {
       field = 'IdentityUser.Email';
     } else if (field === 'userName') {
       field = 'IdentityUser.UserName';
     }
-    if (field && sorter.order) {
+
+    if (field && order) {
       setSortField(field);
-      setSortDirection(sorter.order === 'ascend' ? 'asc' : 'desc');
+      setSortDirection(order === 'ascend' ? 'asc' : 'desc');
     } else {
       setSortField(null);
       setSortDirection(null);
@@ -230,24 +229,6 @@ const UsersTable = () => {
     },
   ];
 
-  const handleRegisterUser = async (values: RegisterUser) => {
-    try {
-      await registerUser(values).unwrap();
-      messageApi?.success('User registered successfully');
-      setRegisterUserModalVisible(false);
-      form.resetFields();
-      refetch();
-    } catch (error: unknown) {
-      const errorMessage =
-        (error as ErrorResponse).data?.message ||
-        (error as ErrorResponse).data?.title ||
-        (error as ErrorResponse).data?.errors?.join(', ') ||
-        'Failed to register user';
-
-      messageApi?.error(errorMessage);
-    }
-  };
-
   const handleRefresh = () => {
     setPageIndex(0);
     if (selectedRoleId) {
@@ -269,14 +250,6 @@ const UsersTable = () => {
           <Typography.Title level={2}>Users Management</Typography.Title>
           <Card
             title="Users"
-            extra={
-              <Button
-                type="primary"
-                onClick={() => setRegisterUserModalVisible(true)}
-              >
-                New User
-              </Button>
-            }
             style={{
               margin: screens.xs ? '2px 0px' : '2px 16px',
               padding: screens.xs ? '4px 0px' : '4px',
@@ -335,11 +308,6 @@ const UsersTable = () => {
             roles={roles}
             selectedRoles={selectedRoles}
             onRoleChange={handleRoleChange}
-          />
-          <RegisterUserModal
-            visible={registerUserModalVisible}
-            onClose={() => setRegisterUserModalVisible(false)}
-            onRegister={handleRegisterUser}
           />
         </Content>
       </Layout>
