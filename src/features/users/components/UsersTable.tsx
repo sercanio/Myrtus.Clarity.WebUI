@@ -49,7 +49,7 @@ const UsersTable = () => {
   const { refetch } = useGetUsersQuery({ pageIndex, pageSize });
 
   const [searchText, setSearchText] = useState('');
-  const [searchField, setSearchField] = useState('firstName');
+  const [searchField, setSearchField] = useState('IdentityUser.UserName');
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<string | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState<string | undefined>();
